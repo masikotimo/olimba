@@ -1,0 +1,109 @@
+import React, {useEffect, useState} from 'react';
+import axios from 'axios';
+import { View, StyleSheet, ScrollView, FlatList, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, Button, Card } from 'react-native-elements';
+import TransactionsCard from '../../components/TransactionsCard';
+import { setSchedule } from '../../store/authslice';
+import { useSelector, useDispatch } from 'react-redux';
+
+const RentalScheduleListScreen = ({navigation}) => {
+    const insets = useSafeAreaInsets();
+    const user = useSelector((state) => state.auth.user);
+    const token = useSelector((state) => state.auth.token);
+    const unit = useSelector((state) => state.auth.unit_id)
+    const dispatch = useDispatch()
+	axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+	const [rentSchedules, setRentSchedules] = useState([]);
+    const [loadingRentSchedules, setLoadingRentSchedules] = useState(true)
+    const [error, setError] = useState(false)
+
+    const formatDate = (date) => {
+        const convertedDate = new Date(date)
+        return convertedDate.toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).split('/').reverse().join('-')};
+
+    const fetchRentSchedules = async () => {
+        try {
+            const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+            setRentSchedules(response.data.data);
+            setLoadingRentSchedules(false);
+        } catch (e) {
+            setError(true);
+            setLoadingRentSchedules(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRentSchedules()
+
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchRentSchedules();
+        })
+      
+        return unsubscribe
+    }, [navigation])
+
+    return (
+        <View style={{marginTop: 20}}>
+            <View style={styles.container}>
+              <View style={styles.welcomeHeader}>
+                <View style={styles.scheduleHead}> 
+                    <Text style={styles.headerText} h3>Rent Schedules</Text>
+                    <Button
+                        buttonStyle={styles.buttonStyle}
+                        title="Add"
+                        onPress={() => navigation.navigate("RentSchedule")}
+                    />
+                </View>
+
+                {loadingRentSchedules ? (
+                    <ActivityIndicator size="large" color="#FCB200" style={{marginTop: 25, marginBottom: 25}}/>
+
+                ) : (
+                    <FlatList 
+                        data={rentSchedules}
+                        keyExtractor={(payment) => payment.related_rental_unit.id}
+                        renderItem={({item}) => {
+                            return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={formatDate(item.initial_payment_date)} onPress={() => {navigation.navigate("ScheduleDetails"), dispatch(setSchedule(item))}}/>
+                        }}
+                    />
+                )}
+              </View>
+            </View>
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        marginTop: 2
+    },
+    headerText: {
+        fontWeight: 400,
+    },
+    welcomeHeader: {
+        marginLeft: 15
+    },
+    scheduleHead: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    buttonStyle: {
+        backgroundColor: '#FCB200',
+        paddingLeft: 40,
+        paddingRight: 40,
+        paddingTop: 15,
+        paddingBottom: 15,
+        borderRadius: 10,
+        marginLeft: 15,
+        marginRight: 15,
+        width: "auto"
+    },
+})
+
+export default RentalScheduleListScreen
