@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 const PaymentWaitingScreen = ({navigation}) => {
     const [status, setStatus] = useState("")
-    const [loadingStatus, setLoadingStatus] = useState("")
+    const [loadingStatus, setLoadingStatus] = useState("");
     const [statusError, setStatusError] = useState(false)
     const token = useSelector((state) => state.auth.token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -16,15 +16,13 @@ const PaymentWaitingScreen = ({navigation}) => {
     const fetchPaymentStatus = async () => {
         try {
             const response = await axios.post(`https://api.rentbeta.fanya.ug/api/v1/tenants/payments/status`, {"id": payId});
-            console.log(response.data.data)
             if(response.data.status === 500){
                 setStatusError(true)
-                setStatus("Insufficient Funds, Please try again")
+                setStatus("Insufficient Funds, Please try again");
             };
             if(response.data.status === 201){
-                navigation.navigate("RentalTracker")
+                navigation.navigate("RentalTracker");
             };
-            setLoadingFees(false);
         } catch (e) {
             console.log(e)
             console.log("Payment Failed");
@@ -33,9 +31,14 @@ const PaymentWaitingScreen = ({navigation}) => {
     };
   
     useInterval(async () => {
-        console.log("polling for status")
         const status = await fetchPaymentStatus()
     }, 5000)
+
+    const navigateToPayment = () => {
+        setStatusError(false)
+        setStatus("")
+        navigation.navigate("MobileMoneyPayment")
+    }
 
   return (
     <ScrollView style={styles.formContainer}>
@@ -50,19 +53,22 @@ const PaymentWaitingScreen = ({navigation}) => {
       
       <View style={styles.textContainer}>
         <Text style={styles.disclaimer}>If you do not receive a USSD prompt, follow these instructions to complete your payment</Text>
-        <Text style={styles.disclaimer}>1. Dial *165*8*2# for MTN or *185*8*2# for Airtel to see the pending payment on the USSD Menu</Text>
+        <Text style={styles.disclaimer}>1. Dial *165*8*3*1# for MTN or *185*8*2# for Airtel to see the pending payment on the USSD Menu</Text>
         <Text style={styles.disclaimer}>2. Enter your pin to confirm</Text>
         <Text style={styles.disclaimer}>3. If your payment is successful, you will be redirected to the Rental Tracker</Text>
       </View>
 
       {statusError ? (
-        <Text style={styles.disclaimer}>{status}</Text>
+        <View style={{alignItems: "center"}}>
+             <Text style={styles.disclaimer}>{status}</Text>
+            <Button
+                buttonStyle={styles.buttonStyle}
+                title="Try Again"
+                onPress={() => navigateToPayment()}
+            />
+        </View>
+       
       ) : (<></>)}
-        <Button
-            buttonStyle={styles.buttonStyle}
-            title="Try Again"
-            onPress={() => navigation.navigate("MobileMoneyPayment")}
-        />
     </ScrollView>
   )
 };

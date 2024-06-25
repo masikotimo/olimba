@@ -6,6 +6,7 @@ import { Text, Button, Card } from 'react-native-elements';
 import TransactionsCard from '../../components/TransactionsCard';
 import { setSchedule } from '../../store/authslice';
 import { useSelector, useDispatch } from 'react-redux';
+import { dateFormatter } from '../../utilities/dateFormatter';
 
 const RentalScheduleListScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
@@ -68,7 +69,11 @@ const RentalScheduleListScreen = ({navigation}) => {
                         data={rentSchedules}
                         keyExtractor={(payment) => payment.related_rental_unit.id}
                         renderItem={({item}) => {
-                            return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={formatDate(item.initial_payment_date)} onPress={() => {navigation.navigate("ScheduleDetails"), dispatch(setSchedule(item))}}/>
+                            if(item.creation_status) {
+                                return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={dateFormatter(item.date_added)} onPress={() => {navigation.navigate("ScheduleDetails"), dispatch(setSchedule(item))}}/>
+                             } else {
+                                return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={dateFormatter(item.initial_payment_date)} onPress={() => {navigation.navigate("ScheduleDetails"), dispatch(setSchedule(item))}}/>
+                            }
                         }}
                     />
                 )}

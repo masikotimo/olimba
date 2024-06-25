@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, ScrollView, View } from 'react-native';
+import { StyleSheet, TextInput, ScrollView, View, TouchableOpacity } from 'react-native';
 import { Text, Button } from 'react-native-elements';
+import { FontAwesome5 } from '@expo/vector-icons';
 import PhoneInput from 'react-native-international-phone-number';
 
 
 const AuthForm = ({ headerText, helperText, errorMessage, onSubmit, submitButtonText, loadingSignIn }) => {
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [inputValue, setInputValue] = useState('');
+
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   function handleInputValue(phoneNumber) {
     setInputValue(phoneNumber);
@@ -33,15 +39,24 @@ const AuthForm = ({ headerText, helperText, errorMessage, onSubmit, submitButton
           onChangeSelectedCountry={handleSelectedCountry}
         />
 
-        <TextInput
-          secureTextEntry
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder='Password'
-        />
+        <View style={[styles.input2, styles.inputView]}>
+          <TextInput
+            secureTextEntry={showPassword}
+            value={password}
+            onChangeText={setPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={styles.input}
+            placeholder='Enter Password'
+          />
+          <TouchableOpacity onPress={togglePassword}>
+            {showPassword ? (
+              <FontAwesome5 name="eye-slash" size={20} color="#7D8FAB" />
+            ) : (
+              <FontAwesome5 name="eye" size={20} color="#7D8FAB"/>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     
       {errorMessage ? (
@@ -78,6 +93,33 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginTop: 15
   },
+  inputView: {
+    display:"flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 15,
+    borderStyle: "1px solid black",
+  },
+  input: {
+    flex:3,
+  },
+  input2: {
+    width: "100%",
+    height: 55,
+    borderColor: "#000",
+    borderWidth: 0.5,
+    marginTop: 12,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    fontSize: 17,
+    color: "#000",
+    backgroundColor: "#fff",
+    padding: 15
+  },
+  icon: {
+    flex:1
+  },
   buttonStyle: {
     backgroundColor: '#FCB200',
     padding: 15,
@@ -92,13 +134,6 @@ const styles = StyleSheet.create({
   },
   inputs: {
     marginTop: 40
-  },
-  input: {
-    height: 50,
-    marginTop: 20,
-    borderWidth: 0.5,
-    padding: 15,
-    borderRadius: 10
   },
   button: {
     marginTop: 30

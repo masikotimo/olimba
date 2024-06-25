@@ -1,128 +1,81 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
-import { View, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
-import { Text, Button, Card } from 'react-native-elements';
+import React from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text, Card, Badge } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import TransactionsCard from '../../components/TransactionsCard';
 import { useSelector } from 'react-redux';
-
+import { dateFormatter } from '../../utilities/dateFormatter';
+import { currencyFormatter } from '../../utilities/currencyFormatter';
 
 const PaymentDetailsScreen = () => {
   const insets = useSafeAreaInsets();
-  const schedule = useSelector((state) => state.auth.schedule);
-  const user = useSelector((state) => state.auth.user);
-  const [payments, setPayments] = useState([])
-  const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(false)
-  const unit = schedule.related_rental_unit.id
-  const unit_name = schedule.related_rental_unit.unit_name
-  const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-  const formatDate = (date) => {
-    const convertedDate = new Date(date)
-    return convertedDate.toLocaleDateString('en-GB', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).split('/').reverse().join('-')};
-  
-  const fetchPayments = async () => {
-    try {
-        const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/payments?tenant_id=${user.id}&unit_id=${unit}`);
-        setPayments(response.data.data);
-        setLoadingRentalPayments(false);
-    } catch (e) {
-        setLoadingRentalPayments(false);
-    }
-};
-
-useEffect(() => {
-    fetchPayments()
-}, [])
+  const paymentDetails = useSelector((state) => state.auth.paymentDetails);
 
   return (
-    <View style={{
-        paddingTop: insets.top,
+    <ScrollView style={{
         paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right}}>
+        }}>
         <View style={styles.container}>
-          {/* <View style={styles.welcomeHeader}>
-            <Text style={styles.headerText} h3>Rental Schedule</Text>
-          </View> */}
           
           <Card containerStyle={styles.trackerCard}>
-            <Text style={styles.trackerCardh2} h2>Unit Name: {unit_name}</Text>
-            <Card.Divider color="#FCB200"/>
-            <Text style={styles.trackerCardh5} h4>Start Date: </Text>
+            <Text h3Style={styles.trackerCardh3} h3>Unit Name: {paymentDetails.related_rental_unit.unit_name}</Text>
+            <Text h4Style={styles.trackerCardh5} h4>Unit Rent: {paymentDetails.unit_rent}</Text>
           </Card>
-          <Text style={styles.trackerCardh5} h4>Transactions</Text>
-          <View >
-            {isLoadingRentalPayments ? (
-                    <ActivityIndicator size="large" color="#FCB200" style={{marginTop: 25, marginBottom: 25}}/>
+          <Card containerStyle={styles.detailsCard}>
+            <View style={styles.detailsTextView}>
+                <Text h4Style={styles.detailsText} h4>Rent Schedule:</Text>
+                <Text h4Style={styles.detailsText} h4>MONTHLY</Text>
+            </View>
+            <View style={styles.detailsTextView}>
+                <Text h4Style={styles.detailsText} h4>Payment Date:</Text>
+                <Text h4Style={styles.detailsText} h4>{currencyFormatter(parseInt(paymentDetails.amount))}</Text>
+            </View>
+            <View style={styles.detailsTextView}>
+                <Text h4Style={styles.detailsText} h4>Payment Date:</Text>
+                <Text h4Style={styles.detailsText} h4>{dateFormatter(paymentDetails.date_created)}</Text>
+            </View>
+            <View style={styles.detailsTextView}>
+                <Text h4Style={styles.detailsText} h4>Status:</Text>
+                {paymentDetails.status ? (
+                    <Badge value="Successful" status="success" />
+
                 ) : (
-                    <FlatList
-                        data={payments}
-                        keyExtractor={(payment) => payment.id}
-                        renderItem={({item}) => {
-                            return <TransactionsCard cardTitle={"Payment"} cardAmount={item.amount} cardDate={"10th Aug, 2023"}/>
-                        }}
-                    />
+                    <Badge value="Unsuccessful" status="error" />
                 )}
-          </View>
+            </View>
+         </Card>
         </View>
-    </View>  
+    </ScrollView>  
   )
 };
 
 const styles = StyleSheet.create({ 
-    headerText: {
-        fontWeight: 400,
-    },
-    welcomeHeader: {
-        marginLeft: 15
-    },
     trackerCard: {
-        borderRadius: 25,
+        borderRadius: 10,
         padding: 20,
         marginTop: 30,
-        backgroundColor: "#F0ECE6",
-        borderColor: "#F0ECE6"
+        backgroundColor: "#EFECEC",
+        borderColor: "#EFECEC"
     },
-    trackerCardh2: {
-        fontWeight: 700
-    },
-    trackerCardh5: {
-        color: "#FCB200",
-        marginTop: 15,
-        marginBottom: 5
-    },
-    buttonStyle: {
-        backgroundColor: '#FCB200',
-        padding: 15,
-        borderRadius: 10,
-        marginTop: 25,
-        marginLeft: 15,
-        marginRight: 15
-    },
-    bottomContainer: {
-        marginLeft: 15,
-        marginRight: 15,
-        marginTop: 30
-    },
-    filterPanel: {
+    detailsTextView:{
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginLeft: 15,
-        marginRight: 15,
-        marginTop: 30
+        justifyContent: "space-between"
     },
-    leftText: {
-        fontWeight: 500
+    detailsCard: {
+        borderRadius: 4,
+        padding: 20,
+        marginTop: 20,
+        backgroundColor: "#FFFFFF",
+        borderColor: "#F0ECE6"
     },
-    rightText: {
-        fontWeight: 500
+    trackerCardh3: {
+        fontWeight: 700,
+        marginBottom: 15
+    },
+    detailsText: {
+        marginTop: 15,
+        marginBottom: 5,
+        fontSize: 17
     },
     
 });

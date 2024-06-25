@@ -8,8 +8,13 @@ const initialState = {
   unit_name: null,
   schedule: null,
   isLoggedIn: false,
+  isReset: false,
   ticketId: null,
   paymentId: null,
+  phoneNumber: null,
+  hasTickets: false,
+  paymentDetails: {},
+  paymentScheduleDetails: {},
   scheduleDate: new Date().toLocaleDateString('en-US', {
     weekday: 'short',
     year: 'numeric',
@@ -33,7 +38,7 @@ export const authSlice = createSlice({
         state.isLoggedIn = false;
     },
     setUnitId: (state, action) => {
-      state.unit_id = action.payload
+      state.unit_id = action.payload;
     },
     setUnitName: (state, action) => {
       state.unit_name = action.payload
@@ -52,10 +57,25 @@ export const authSlice = createSlice({
     },
     setScheduleDate: (state, action) => {
       state.scheduleDate = action.payload
+    },
+    setPhoneNumber: (state, action) => {
+      state.phoneNumber = action.payload;
+    },
+    setIsReset: (state, action) => {
+      state.isReset = action.payload
+    },
+    setHasTickets: (state, action) => {
+      state.hasTickets = action.payload
+    },
+    setPaymentDetails: (state, action) => {
+      state.paymentDetails = action.payload
+    },
+    setPaymentScheduleDetails: (state, action) => {
+      state.paymentScheduleDetails = action.payload
     }
   },
 });
 
-export const { setLogin, setLogout, setUnitId, setUnitName, setSchedule, setTicketId, setPaymentId, setUserSignUp, setScheduleDate } = authSlice.actions;
+export const { setLogin, setLogout, setUnitId, setUnitName, setSchedule, setTicketId, setPaymentId, setUserSignUp, setScheduleDate, setPhoneNumber, setIsReset, setPaymentDetails, setPaymentScheduleDetails} = authSlice.actions;
 
 export default authSlice.reducer;

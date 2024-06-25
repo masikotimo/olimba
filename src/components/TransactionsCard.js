@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Button, Card } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { currencyFormatter } from '../utilities/currencyFormatter';
 
 const TransactionsCard = ({cardTitle, cardAmount, cardDate, cardInterest, onPress}) => {
 
@@ -23,8 +24,10 @@ const TransactionsCard = ({cardTitle, cardAmount, cardDate, cardInterest, onPres
                         </View>
                     </View>
                     <View>
-                        <Text style={{fontWeight: 600, fontSize: 16, color:"#19B289"}} p>UGX {cardAmount}</Text>
-                        <Text style={{}} p>{cardInterest}</Text>
+                        <Text style={{fontWeight: 600, fontSize: 16, color:"#19B289"}} p>{currencyFormatter(parseInt(cardAmount))}</Text>
+                        {cardInterest && (
+                            <Text style={{fontWeight: 300, fontSize: 15, color:"#fa0f0f"}} p> - {currencyFormatter(parseInt(cardInterest))}</Text>
+                        )}
                     </View>
                 </View>
             </Card>

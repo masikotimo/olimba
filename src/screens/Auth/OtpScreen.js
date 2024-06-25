@@ -4,7 +4,7 @@ import {StyleSheet, View, ActivityIndicator, TextInput, ScrollView, Text} from '
 import { Button } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from "react-redux";
-import { setLogin, setUnitId, setUnitName } from '../../store/authslice';
+import { setLogin, setUnitId, setUnitName, setIsReset } from '../../store/authslice';
 import backendApi from "../../api/backend";
 // import RNOtpVerify from 'react-native-otp-verify';
 
@@ -22,6 +22,7 @@ const OtpScreen = (props) => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch()
   const userSignUp = useSelector((state) => state.auth.userSignUp);
+  const isReset = useSelector((state) => state.auth.isReset);
   const [loadingSignIn, setLoadingSignIn] = useState(false)
 
   const [attemptsRemaining, setAttemptsRemaining] = useState(attempts);
@@ -164,14 +165,30 @@ const OtpScreen = (props) => {
       setLoadingSignIn(true)
       let otpUnclean = otpArray.toString()
       let otp_code = otpUnclean.replaceAll(",", "")
-      const response = await backendApi.post("/accounts/otp/verify", { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
-      dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
-      dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
-      dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
-      await AsyncStorage.setItem("token", response.data.data.token.token);
-      await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
-      await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+      if(isReset){
+        const url = "/accounts/users/confirm_change_password"
+        const response = await backendApi.post(url, { "username": userSignUp.username, "otp_code": parseInt(otp_code) });
+        dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
+        dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
+        dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
+        dispatch(setIsReset(false))
+        await AsyncStorage.setItem("token", response.data.data.token.token);
+        await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
+        await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+      }else{
+        const url = "/accounts/otp/verify"
+        const response = await backendApi.post(url, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
+        dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
+        dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
+        dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
+        dispatch(setIsReset(false))
+        await AsyncStorage.setItem("token", response.data.data.token.token);
+        await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
+        await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+      }
+      
     } catch (err) {
+      console.log(err)
       setErrorMessage("Invalid OTP, Please use the correct OTP")
       setLoadingSignIn(false)
     }

@@ -5,6 +5,8 @@ import { Text, Button, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TransactionsCard from '../../components/TransactionsCard';
 import { useSelector } from 'react-redux';
+import { monthFormatter } from '../../utilities/dateFormatter';
+import { currencyFormatter } from '../../utilities/currencyFormatter';
 
 
 const RentalScheduleDetailsScreen = () => {
@@ -12,6 +14,7 @@ const RentalScheduleDetailsScreen = () => {
   const schedule = useSelector((state) => state.auth.schedule);
   const user = useSelector((state) => state.auth.user);
   const [payments, setPayments] = useState([])
+  const [unitDetails, setUnitDetails] = useState([])
   const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(false)
   const unit = schedule.related_rental_unit.id
   const unit_name = schedule.related_rental_unit.unit_name
@@ -28,8 +31,9 @@ const RentalScheduleDetailsScreen = () => {
   
   const fetchPayments = async () => {
     try {
-        const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/payments?tenant_id=${user.id}&unit_id=${unit}`);
-        setPayments(response.data.data);
+        const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/mark_occupancy?tenant_id=${user.id}&unit_id=${unit}`);
+        setUnitDetails(response.data.data.unit)
+        setPayments(response.data.data.schedules);
         setLoadingRentalPayments(false);
     } catch (e) {
         setLoadingRentalPayments(false);
@@ -41,19 +45,21 @@ useEffect(() => {
 }, [])
 
   return (
-    <View >
+    <View styles={{
+        paddingBottom: insets.bottom,   
+    }}>
         <View style={styles.container}>
           {/* <View style={styles.welcomeHeader}>
             <Text style={styles.headerText} h3>Rental Schedule</Text>
           </View> */}
           
           <Card containerStyle={styles.trackerCard}>
-            <Text style={styles.trackerCardh2} h2>Unit Name: {unit_name}</Text>
+            <Text h3Style={styles.trackerCardh2} h3>Unit Name: {unit_name}</Text>
             <Card.Divider color="#FCB200"/>
-            <Text style={styles.trackerCardh5} h4>Start Date: </Text>
+            <Text h4Style={styles.trackerCardh5} h4>Unit Rent: {currencyFormatter(parseInt(unitDetails.unit_rent))} per {unitDetails.unit_rent_cycle}</Text>
           </Card>
-          <Text style={styles.trackerCardh5} h4>Transactions</Text>
-          <View >
+          <Text h4Style={styles.transactionText} h4>Transactions</Text>
+          <View style={styles.transactionsContainer}>
             {isLoadingRentalPayments ? (
                     <ActivityIndicator size="large" color="#FCB200" style={{marginTop: 25, marginBottom: 25}}/>
                 ) : (
@@ -61,7 +67,7 @@ useEffect(() => {
                         data={payments}
                         keyExtractor={(payment) => payment.id}
                         renderItem={({item}) => {
-                            return <TransactionsCard cardTitle={"Payment"} cardAmount={item.amount} cardDate={"10th Aug, 2023"}/>
+                            return <TransactionsCard cardTitle={monthFormatter(item.start_date)} cardAmount={item.total_amout_paid} cardInterest={item.outstanding_balance} cardDate={item.end_date}/>
                         }}
                     />
                 )}
@@ -73,7 +79,7 @@ useEffect(() => {
 
 const styles = StyleSheet.create({ 
     container: {
-        marginTop: 20
+        marginTop: 15,
     },
     headerText: {
         fontWeight: 400,
@@ -85,16 +91,23 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         padding: 20,
         marginTop: 30,
-        backgroundColor: "#F0ECE6",
-        borderColor: "#F0ECE6"
+        backgroundColor: "#EFECEC",
+        borderColor: "#EFECEC"
     },
     trackerCardh2: {
         fontWeight: 700
     },
     trackerCardh5: {
         color: "#FCB200",
-        marginTop: 15,
-        marginBottom: 5
+        marginTop: 10,
+        marginBottom: 5,
+        fontSize: 18
+    },
+    transactionText:{
+        fontWeight: 300,
+        marginTop: 20,
+        marginLeft: 15,
+        fontSize: 18
     },
     buttonStyle: {
         backgroundColor: '#FCB200',
@@ -123,7 +136,8 @@ const styles = StyleSheet.create({
     rightText: {
         fontWeight: 500
     },
-    
+    transactionsContainer: {
+    }
 });
 
 export default RentalScheduleDetailsScreen;

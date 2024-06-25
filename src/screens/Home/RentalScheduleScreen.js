@@ -80,7 +80,7 @@ const RentScheduleScreen = ({navigation}) => {
         />
 
         <TextInput
-          placeholder="Add Unit Rent"
+          placeholder="Add Unit Rent Amount"
           style={styles.inputBox}
           onChangeText={setUnitRent}
           value={unitRent}

@@ -2,7 +2,7 @@
   "expo": {
     "name": "RentBeta",
     "slug": "rent-beta",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rentbeta.africa"
+      "bundleIdentifier": "com.rentbeta.africa",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

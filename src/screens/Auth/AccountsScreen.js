@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Card, Text, Avatar } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,18 +8,35 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Option from '../../components/Option';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
 
 const AccountScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const [count, setCount] = useState(0)
+  const url = "https://api.rentbeta.fanya.ug/api/v1"
+
+  useEffect(() => {
+    useGetTicketDetails()
+
+  }, [])
+
+  const useGetTicketDetails = async () => {
+    try {
+        const response = await axios.get(`${url}/accounts/users/has_schedule?tenant_id=${user.id}`);
+        setCount(response.data.data)
+    } catch (e) {
+        console.log("Fetch ticket details failed");
+    }
+  }
 
   const signOut = async () => {
     dispatch(setLogout())
-    await AsyncStorage.removeItem('token')
-    await AsyncStorage.removeItem('user_details')
-    await AsyncStorage.removeItem('unit_id')
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user_details');
+    await AsyncStorage.removeItem('unit_id');
   }
 
   return (
@@ -42,7 +59,6 @@ const AccountScreen = () => {
                     size="large"
                     rounded
                     title="AV"
-                    onPress={() => console.log("Works!")}
                     activeOpacity={0.7}
                     containerStyle={{backgroundColor: "#FCB200", marginRight: 15 }}
                   />
@@ -71,8 +87,12 @@ const AccountScreen = () => {
           <View >
             {/* <Option optionText={"Recent Payments"} onPress={() => navigation.navigate("PaymentsList")}/>
             <Card.Divider/> */}
-            {/* <Option optionText={"ID Verification"} onPress={() => navigation.navigate("IDVerification")}/>
-            <Card.Divider/> */}
+            {count > 0 && (
+              <>
+                <Option optionText={"Tickets"} onPress={() => navigation.navigate("TicketList")}/>
+                <Card.Divider/>
+              </>
+            )}
             <Option optionText={"Rent Schedules"}  onPress={() => navigation.navigate("ScheduleList")}/>
             <Card.Divider/>
             <Option optionText={"Help and Support"} onPress={() => navigation.navigate("HelpSupport")}/>

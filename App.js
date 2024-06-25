@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AccountsScreen from "./src/screens/Auth/AccountsScreen";
 import IDVerificationScreen from "./src/screens/Account/IDVerificationScreen";
 import HelpSupportScreen from "./src/screens/Account/HelpSupportScreen";
+import DeleteAccountScreen from "./src/screens/Auth/DeleteAccount";
 import AppVersionScreen from "./src/screens/Account/AppVersionScreen";
 import AccountSuccessfulScreen from "./src/screens/Auth/AccountSuccessfulScreen";
 import OtpScreen from "./src/screens/Auth/OtpScreen";
@@ -17,12 +18,14 @@ import SigninScreen from "./src/screens/Auth/SigninScreen";
 import SignupScreen from "./src/screens/Auth/SignupScreen";
 import ForgotPasswordScreen from "./src/screens/Auth/ForgotPasswordScreen";
 import AccountDetailsScreen from "./src/screens/Account/AccountDetails";
+import PasswordResetScreen from "./src/screens/Auth/PasswordResetScreen";
 
 import RentalCalenderScreen from "./src/screens/Home/RentalCalenderScreen";
 import RentalTrackerScreen from "./src/screens/Home/RentalTrackerScreen";
 import RentScheduleScreen from "./src/screens/Home/RentalScheduleScreen";
 import RentalScheduleListScreen from "./src/screens/Home/RentalScheduleListScreen";
 import RentalScheduleDetailsScreen from "./src/screens/Home/RentalScheduleDetailsScreen";
+import LandlordDetailsScreen from "./src/screens/Account/LandlordDetailsScreen";
 
 import PropertyDiscoverScreen from "./src/screens/FindHouse/PropertyDiscoverScreen";
 import PropertyDetailsScreen from "./src/screens/FindHouse/PropertyDetailsScreen";
@@ -31,6 +34,7 @@ import PropertySearchScreen from "./src/screens/FindHouse/PropertySearchScreen";
 import PaymentMethodScreen from "./src/screens/Payments/PaymentMethodScreen";
 import MobileMoneyPayment from "./src/screens/Payments/MobileMoneyPayment";
 import PaymentListScreen from "./src/screens/Payments/PaymentListScreen";
+import PaymentDetailsScreen from "./src/screens/Payments/PaymentDetailsScreen";
 import UtilityPaymentsScreen from "./src/screens/Payments/UtilityPaymentsScreen";
 import PaymentWaitingScreen from "./src/screens/Payments/PaymentWaitingScreen";
 
@@ -93,6 +97,7 @@ function PaymentScreens() {
   return (
     <Stack.Navigator >
         <Stack.Screen name="PaymentsList" component={PaymentListScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen}/>
     </Stack.Navigator>
   )
 }
@@ -107,8 +112,14 @@ const AccountScreens = () => {
       <Stack.Screen name="AppVersion" component={AppVersionScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="ScheduleList" component={RentalScheduleListScreen} options={{ title: 'Schedules' }}/>
-      <Stack.Screen name="ScheduleDetails" component={RentalScheduleDetailsScreen} />
-      <Stack.Screen name="AccountDetails" component={AccountDetailsScreen} options={{ title: 'Personal Details' }}/>
+      <Stack.Screen name="ScheduleDetails" component={RentalScheduleDetailsScreen} options={{ title: 'Schedule Details'}}/>
+      <Stack.Screen name="AccountDetails" component={AccountDetailsScreen} options={{ title: 'Account Details' }}/>
+      <Stack.Screen name="AccountDelete" component={DeleteAccountScreen} options={{ title: 'Delete Account' }}/>
+      <Stack.Screen name="LandlordDetails" component={LandlordDetailsScreen} options={{ title: 'Landlord Details' }}/>
+      <Stack.Screen name="TicketList" component={TicketListScreen} />
+      <Stack.Screen name="TicketCreate" component={TicketCreateScreen} />
+      <Stack.Screen name="TicketVerboseList" component={TicketVerboseListScreen} />
+      <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
     </Stack.Navigator>
   )
 }
@@ -121,6 +132,7 @@ const AuthScreens = () => {
         <Stack.Screen name="Otp" component={OtpScreen} />
         <Stack.Screen name="AccountSuccessful" component={AccountSuccessfulScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ResetPassword" component={PasswordResetScreen} />
     </Stack.Navigator>
   )
 }

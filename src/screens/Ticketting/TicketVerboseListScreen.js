@@ -37,11 +37,7 @@ const TicketVerboseListScreen = ({navigation}) => {
 	}, [navigation]);
 
     return (
-        <View style={{
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom,
-            paddingLeft: insets.left,
-            paddingRight: insets.right}}>
+        <View >
             <View style={styles.container}>
               <View style={styles.welcomeHeader}>
                 <Text style={styles.headerText} h3>All Tickets</Text>
@@ -68,7 +64,8 @@ const styles = StyleSheet.create({
         fontWeight: 400,
     },
     welcomeHeader: {
-        marginLeft: 15
+        marginLeft: 15,
+        marginTop: 18
     },
 })
 

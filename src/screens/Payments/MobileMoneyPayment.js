@@ -65,10 +65,13 @@ const MobileMoneyPayment = () => {
             dispatch(setPaymentId(response.data.data.id))
             setTimeout(() => {
               setLoadingPaymentCall(false)
+              setAmount("")
+              setTotal({"total":0, "fee":0})
               navigation.navigate("PaymentWaiting");
             }, 2000);
           }
         } catch (err) {
+          console.log(err)
           setErrorMessage("Payment Failed")
           setLoadingPaymentCall(false)
         }

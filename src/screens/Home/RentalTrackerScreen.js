@@ -1,9 +1,8 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import axios from 'axios';
 import { View, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator} from 'react-native';
-import { Text, Button, Card, Avatar, Skeleton } from 'react-native-elements';
+import { Text, Button, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CalendarStrip from "react-native-calendar-strip";
 import moment from "moment";
 import { AntDesign } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +11,8 @@ import SelectDropdown from 'react-native-select-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { setUnitId, setUnitName } from '../../store/authslice';
 import NetworkStatus from '../../components/NetworkStatus';
+import { StatusBar } from 'expo-status-bar';
+import { currencyFormatter } from '../../utilities/currencyFormatter';
 
 const RentalTrackerScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
@@ -29,11 +30,12 @@ const RentalTrackerScreen = ({navigation}) => {
   const unit_name = useSelector((state) => state.auth.unit_name);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
+  const url = "https://api.rentbeta.fanya.ug/api/v1"
 
   const useGetOccupancyDetails = async () => {    
     try {
       setLoadingOccupancyDetails(true)
-      const response = await axios.post(`https://api.rentbeta.fanya.ug/api/v1/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
+      const response = await axios.post(`${url}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
       setOccupancyDetails(response.data.data);
       if(response.data.data.rate === 0){
         setColor("#82ed9f")
@@ -57,7 +59,7 @@ const RentalTrackerScreen = ({navigation}) => {
 
   const useGetOccupancyList = async () => {    
     try {
-      const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      const response = await axios.get(`${url}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);
     } catch (e) {
@@ -99,6 +101,7 @@ const RentalTrackerScreen = ({navigation}) => {
       paddingBottom: insets.bottom,
       paddingLeft: insets.left,
       paddingRight: insets.right}}>
+      <StatusBar style="dark" />
       <View style={styles.container}>
         <NetworkStatus />
         <View style={styles.welcomeHeader}>
@@ -191,7 +194,7 @@ const RentalTrackerScreen = ({navigation}) => {
               <View >
                   <Text style={styles.trackerCardh5} h4>Your Rent for Unit {unit_name}</Text>
                   <Card.Divider color="#FCB200"/>
-                  <Text style={styles.trackerCardh2} h2>{occupancyDetails.amount_to_pay}</Text>
+                  <Text style={styles.trackerCardh2} h2>{currencyFormatter(parseInt(occupancyDetails.amount_to_pay))}</Text>
                   <Text style={styles.trackerCardh5} h4>Is Due in</Text>
                   <Card.Divider color="#FCB200"/>
                   <Text style={styles.trackerCardh2} h2>{occupancyDetails.days_left} Days</Text>
@@ -205,7 +208,7 @@ const RentalTrackerScreen = ({navigation}) => {
           <></>
         ) : (
           <>
-          <Text style={styles.installmentText} h5>You can make a partial payment of {occupancyDetails.installment} today</Text>
+          <Text style={styles.installmentText} h5>You can make a partial payment of {currencyFormatter(parseInt(occupancyDetails.installment))} today</Text>
           <Button
             buttonStyle={styles.buttonStyle}
             title="Pay Rent"

@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUserSignUp } from '../../store/authslice';
 import PhoneInput from 'react-native-international-phone-number';
 import backendApi from "../../api/backend";
+import { StatusBar } from 'expo-status-bar';
 
 const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
@@ -37,7 +38,7 @@ const SignupScreen = ({ navigation }) => {
   }, [firstname, lastname, email, password]); 
 
   const validateForm = () => { 
-      let errors = {}; 
+      let errors = {};
 
       // Validate name field 
       if (!firstname) { 
@@ -91,6 +92,7 @@ const SignupScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <StatusBar style="dark" />
       <View style={styles.headerText}>
         <Text style={styles.headerTextStyle} h3>Welcome to Rent Beta</Text>
         <Text style={styles.helperTextStyle} h5>Create your account</Text>
@@ -172,6 +174,11 @@ const SignupScreen = ({ navigation }) => {
         text="Already have an account?"
         linkText="Sign in"
       />
+      {/* <NavLink
+        text="Need New Activation OTP?"
+        linkText="Get OTP"
+        routeName="Signup"
+      /> */}
     </ScrollView>
   );
 };
@@ -183,6 +190,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 80,
+    marginBottom: 50,
     borderWidth: 10,
     borderColor: 'white',
     borderRadius: 25,
