@@ -259,7 +259,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         marginBottom: 15,
-        borderStyle: "1px solid black",
     },
     input: {
         flex:3,

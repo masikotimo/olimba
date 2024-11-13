@@ -6,6 +6,7 @@ import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setLogout } from '../../store/authslice';
 import { useDispatch } from 'react-redux';
+import {API_URL} from '@env';
 
 const DeleteAccountScreen = ({navigation}) => {
   const [reason, setReason] = useState("");
@@ -32,7 +33,7 @@ const DeleteAccountScreen = ({navigation}) => {
   const performDelete = async () => {
     try {
       setLoadingDeleteCall(true)
-      const response = await axios.post("https://api.rentbeta.fanya.ug/api/v1/accounts/tenants/schedule_delete", { "username": username, "reason": reason});
+      const response = await axios.post(`${API_URL}/accounts/tenants/schedule_delete`, { "username": username, "reason": reason});
       if(response.data.status === 200 || response.data.status === 404) {
         dispatch(setLogout())
         await AsyncStorage.removeItem('token')

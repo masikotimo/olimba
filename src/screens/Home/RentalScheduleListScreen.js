@@ -7,6 +7,7 @@ import TransactionsCard from '../../components/TransactionsCard';
 import { setSchedule } from '../../store/authslice';
 import { useSelector, useDispatch } from 'react-redux';
 import { dateFormatter } from '../../utilities/dateFormatter';
+import {API_URL} from '@env';
 
 const RentalScheduleListScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
@@ -29,7 +30,7 @@ const RentalScheduleListScreen = ({navigation}) => {
 
     const fetchRentSchedules = async () => {
         try {
-            const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+            const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
             setRentSchedules(response.data.data);
             setLoadingRentSchedules(false);
         } catch (e) {
@@ -49,11 +50,11 @@ const RentalScheduleListScreen = ({navigation}) => {
     }, [navigation])
 
     return (
-        <View style={{marginTop: 20}}>
+        <View >
             <View style={styles.container}>
               <View style={styles.welcomeHeader}>
                 <View style={styles.scheduleHead}> 
-                    <Text style={styles.headerText} h3>Rent Schedules</Text>
+                    <Text h3Style={styles.headerText} h3>Rent Schedules</Text>
                     <Button
                         buttonStyle={styles.buttonStyle}
                         title="Add"
@@ -85,7 +86,7 @@ const RentalScheduleListScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 2
+        marginTop: 10
     },
     headerText: {
         fontWeight: 400,

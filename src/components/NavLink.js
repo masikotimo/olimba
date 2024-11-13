@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 
 const NavLink = ({ text, linkText, routeName }) => {
@@ -8,7 +9,7 @@ const NavLink = ({ text, linkText, routeName }) => {
     <View style={styles.navView}>
         <Text style={styles.text}>{text}</Text>
         <TouchableOpacity onPress={() => navigation.navigate(routeName)}>
-            <Text style={styles.link}>{linkText}</Text>
+            <Text h5style={styles.link} h5>{linkText}</Text>
         </TouchableOpacity>
     </View>
   );

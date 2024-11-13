@@ -7,6 +7,7 @@ import TransactionsCard from '../../components/TransactionsCard';
 import { useSelector } from 'react-redux';
 import { monthFormatter } from '../../utilities/dateFormatter';
 import { currencyFormatter } from '../../utilities/currencyFormatter';
+import {API_URL} from '@env';
 
 
 const RentalScheduleDetailsScreen = () => {
@@ -15,7 +16,7 @@ const RentalScheduleDetailsScreen = () => {
   const user = useSelector((state) => state.auth.user);
   const [payments, setPayments] = useState([])
   const [unitDetails, setUnitDetails] = useState([])
-  const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(false)
+  const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(true)
   const unit = schedule.related_rental_unit.id
   const unit_name = schedule.related_rental_unit.unit_name
   const token = useSelector((state) => state.auth.token);
@@ -31,7 +32,7 @@ const RentalScheduleDetailsScreen = () => {
   
   const fetchPayments = async () => {
     try {
-        const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/mark_occupancy?tenant_id=${user.id}&unit_id=${unit}`);
+        const response = await axios.get(`${API_URL}/tenants/mark_occupancy?tenant_id=${user.id}&unit_id=${unit}`);
         setUnitDetails(response.data.data.unit)
         setPayments(response.data.data.schedules);
         setLoadingRentalPayments(false);
@@ -45,9 +46,7 @@ useEffect(() => {
 }, [])
 
   return (
-    <View styles={{
-        paddingBottom: insets.bottom,   
-    }}>
+    <View>
         <View style={styles.container}>
           {/* <View style={styles.welcomeHeader}>
             <Text style={styles.headerText} h3>Rental Schedule</Text>
@@ -56,7 +55,7 @@ useEffect(() => {
           <Card containerStyle={styles.trackerCard}>
             <Text h3Style={styles.trackerCardh2} h3>Unit Name: {unit_name}</Text>
             <Card.Divider color="#FCB200"/>
-            <Text h4Style={styles.trackerCardh5} h4>Unit Rent: {currencyFormatter(parseInt(unitDetails.unit_rent))} per {unitDetails.unit_rent_cycle}</Text>
+            <Text h4Style={styles.trackerCardh5} h4>Unit Rent: {currencyFormatter(parseInt(unitDetails.unit_rent))} </Text>
           </Card>
           <Text h4Style={styles.transactionText} h4>Transactions</Text>
           <View style={styles.transactionsContainer}>
@@ -79,29 +78,24 @@ useEffect(() => {
 
 const styles = StyleSheet.create({ 
     container: {
-        marginTop: 15,
-    },
-    headerText: {
-        fontWeight: 400,
-    },
-    welcomeHeader: {
-        marginLeft: 15
+        marginTop: 2,
     },
     trackerCard: {
         borderRadius: 25,
         padding: 20,
-        marginTop: 30,
+        marginTop: 10,
         backgroundColor: "#EFECEC",
         borderColor: "#EFECEC"
     },
     trackerCardh2: {
-        fontWeight: 700
+        fontWeight: 600
     },
     trackerCardh5: {
         color: "#FCB200",
         marginTop: 10,
         marginBottom: 5,
-        fontSize: 18
+        fontSize: 18,
+        fontWeight: 400
     },
     transactionText:{
         fontWeight: 300,
@@ -117,26 +111,8 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         marginRight: 15
     },
-    bottomContainer: {
-        marginLeft: 15,
-        marginRight: 15,
-        marginTop: 30
-    },
-    filterPanel: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginLeft: 15,
-        marginRight: 15,
-        marginTop: 30
-    },
-    leftText: {
-        fontWeight: 500
-    },
-    rightText: {
-        fontWeight: 500
-    },
     transactionsContainer: {
+        
     }
 });
 

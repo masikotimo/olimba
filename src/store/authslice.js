@@ -36,6 +36,7 @@ export const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isLoggedIn = false;
+        state.unit_id = null;
     },
     setUnitId: (state, action) => {
       state.unit_id = action.payload;

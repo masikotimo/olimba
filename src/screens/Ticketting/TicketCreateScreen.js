@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from 'axios';
 const titles = ["Electricity", "Water", "Security", "Plumbing", "Others"]
 const severities = [{"name":"Low"}, {"name":"Medium"}, {"name":"High"}, {"name":"Urgent"}]
+import {API_URL} from '@env';
 
 
 const TicketCreateScreen = ({navigation}) => {
@@ -26,7 +27,7 @@ const TicketCreateScreen = ({navigation}) => {
 
   const useGetOccupancyList = async () => {    
     try {
-      const response = await axios.get(`https://api.rentbeta.iolabsug.com/api/v1/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);
     } catch (e) {
@@ -84,7 +85,7 @@ const TicketCreateScreen = ({navigation}) => {
   const submitTicket = async () => {
     try {
       setLoadingTicketCreate(true)
-      const response = await axios.post("https://api.rentbeta.iolabsug.com/api/v1/tenants/tickets", { "related_rental_unit": unit, "related_tenant": user.id, "title": title, "description": description });
+      const response = await axios.post(`${API_URL}/tenants/tickets`, { "related_rental_unit": unit, "related_tenant": user.id, "title": title, "description": description });
     //   console.log(response)
       navigation.navigate("TicketList");
     } catch (err) {

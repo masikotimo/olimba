@@ -5,7 +5,7 @@ import { Text, Button, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TicketUpdateCard from '../../components/TicketUpdateCard';
 import { useSelector } from 'react-redux';
-
+import {API_URL} from '@env';
 
 const TicketDetailsScreen = () => {
   const insets = useSafeAreaInsets();
@@ -25,7 +25,7 @@ const TicketDetailsScreen = () => {
   
   const fetchTicketDetails = async () => {
     try {
-        const response = await axios.get(`https://api.rentbeta.iolabsug.com/api/v1/tenants/tickets/single?ticket_id=${ticketId}`);
+        const response = await axios.get(`${API_URL}/tenants/tickets/single?ticket_id=${ticketId}`);
         setTicketDetails(response.data.data);
         setLoadingTicketDetails(false);
     } catch (e) {
@@ -47,10 +47,6 @@ useEffect(() => {
           <ActivityIndicator size="large" color="#FCB200" style={{marginTop: 25, marginBottom: 25}}/>
         ) : (
           <View style={styles.container}>
-            {/* <View style={styles.welcomeHeader}>
-              <Text style={styles.headerText} h3>Rental Schedule</Text>
-            </View> */}
-            
             {ticketDetails.status === 0 ? (
               <Card containerStyle={styles.trackerCard}>
                 <Text style={styles.trackerCardh2} h2>Status: Pending</Text>

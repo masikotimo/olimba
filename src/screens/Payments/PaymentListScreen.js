@@ -8,6 +8,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { dateFormatter } from '../../utilities/dateFormatter';
 import { setPaymentDetails } from '../../store/authslice';
+import {API_URL} from '@env';
 
 const PaymentListScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
@@ -19,11 +20,10 @@ const PaymentListScreen = ({navigation}) => {
 	const [rentalPayments, setRentalPayments] = useState([]);
     const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(true);
 	const [paymentsError, setPaymentsError] = useState(false);
-    const url = "https://api.rentbeta.fanya.ug/api/v1"
 
     const fetchPayments = async () => {
         try {
-            const response = await axios.get(`${url}/tenants/payments?tenant_id=${user.id}`);
+            const response = await axios.get(`${API_URL}/tenants/payments?tenant_id=${user.id}`);
             setRentalPayments(response.data.data);
             setLoadingRentalPayments(false);
         } catch (e) {

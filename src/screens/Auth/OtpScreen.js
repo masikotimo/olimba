@@ -1,6 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {StyleSheet, View, ActivityIndicator, TextInput, ScrollView, Text} from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from "react-redux";
@@ -22,8 +23,7 @@ const OtpScreen = (props) => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch()
   const userSignUp = useSelector((state) => state.auth.userSignUp);
-  const isReset = useSelector((state) => state.auth.isReset);
-  const [loadingSignIn, setLoadingSignIn] = useState(false)
+  const [loadingSignIn, setLoadingSignIn] = useState(false);
 
   const [attemptsRemaining, setAttemptsRemaining] = useState(attempts);
   const [otpArray, setOtpArray] = useState(['', '', '', '']);
@@ -161,37 +161,25 @@ const OtpScreen = (props) => {
   };
 
   const onSubmitButtonPress = async () => {
-    try {
-      setLoadingSignIn(true)
-      let otpUnclean = otpArray.toString()
-      let otp_code = otpUnclean.replaceAll(",", "")
-      if(isReset){
-        const url = "/accounts/users/confirm_change_password"
-        const response = await backendApi.post(url, { "username": userSignUp.username, "otp_code": parseInt(otp_code) });
-        dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
-        dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
-        dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
-        dispatch(setIsReset(false))
-        await AsyncStorage.setItem("token", response.data.data.token.token);
-        await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
-        await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
-      }else{
-        const url = "/accounts/otp/verify"
-        const response = await backendApi.post(url, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
-        dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
-        dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
-        dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
-        dispatch(setIsReset(false))
-        await AsyncStorage.setItem("token", response.data.data.token.token);
-        await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
-        await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
-      }
-      
-    } catch (err) {
-      console.log(err)
-      setErrorMessage("Invalid OTP, Please use the correct OTP")
-      setLoadingSignIn(false)
-    }
+    // try {
+    setLoadingSignIn(true)
+    let otpUnclean = otpArray.toString()
+    let otp_code = otpUnclean.replaceAll(",", "")
+    
+    const url = "/accounts/otp/verify"
+    const response = await backendApi.post(url, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
+    dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
+    dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
+    dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
+    setLoadingSignIn(false)
+    await AsyncStorage.setItem("token", response.data.data.token.token);
+    await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
+    await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+    // } catch (err) {
+    //   console.log(err)
+    //   setErrorMessage("Invalid OTP, Please use the correct OTP")
+    //   setLoadingSignIn(false)
+    // }
   };
 
   // this event won't be fired when text changes from '' to '' i.e. backspace is pressed
@@ -272,7 +260,7 @@ const OtpScreen = (props) => {
                     borderWidth: 1,
                     borderRadius: 4,
                     padding: 20,
-                }}>
+                }} key={index}>
                     <TextInput
                         containerStyle={[styles.fill, styles.mr12]}
                         value={otpArray[index]}
@@ -296,11 +284,22 @@ const OtpScreen = (props) => {
           {/* {resendButtonDisabledTime > 0 ? (
             <TimerText text={'Resend OTP in'} time={resendButtonDisabledTime} />
           ) : ( */}
-          <Button
+          <>
+          {loadingSignIn ? (
+            <Button
+              buttonStyle={styles.buttonStyle}
+              title="VERFIY OTP"
+              loading
+              disabled
+            />
+          ) : (
+            <Button
             buttonStyle={styles.buttonStyle}
-            title="VERIFY"
+            title="VERIFY OTP"
             onPress={() => onSubmitButtonPress()}
             />
+            )}
+          </>
           {/* )} */}
           <View style={styles.fill} />
           {submittingOtp && <ActivityIndicator />}
@@ -344,7 +343,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   otpText: {
-    fontWeight: 'bold',
+    // fontWeight: 500,
     color: "#444",
     fontSize: 18,
     width: '100%',

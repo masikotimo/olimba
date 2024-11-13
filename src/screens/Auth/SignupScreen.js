@@ -172,7 +172,7 @@ const SignupScreen = ({ navigation }) => {
       <NavLink
         routeName="Signin"
         text="Already have an account?"
-        linkText="Sign in"
+        linkText="Sign IN"
       />
       {/* <NavLink
         text="Need New Activation OTP?"

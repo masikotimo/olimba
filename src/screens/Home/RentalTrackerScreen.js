@@ -13,6 +13,7 @@ import { setUnitId, setUnitName } from '../../store/authslice';
 import NetworkStatus from '../../components/NetworkStatus';
 import { StatusBar } from 'expo-status-bar';
 import { currencyFormatter } from '../../utilities/currencyFormatter';
+import {API_URL} from '@env';
 
 const RentalTrackerScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
@@ -30,12 +31,12 @@ const RentalTrackerScreen = ({navigation}) => {
   const unit_name = useSelector((state) => state.auth.unit_name);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-  const url = "https://api.rentbeta.fanya.ug/api/v1"
+
 
   const useGetOccupancyDetails = async () => {    
     try {
       setLoadingOccupancyDetails(true)
-      const response = await axios.post(`${url}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
+      const response = await axios.post(`${API_URL}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
       setOccupancyDetails(response.data.data);
       if(response.data.data.rate === 0){
         setColor("#82ed9f")
@@ -59,7 +60,7 @@ const RentalTrackerScreen = ({navigation}) => {
 
   const useGetOccupancyList = async () => {    
     try {
-      const response = await axios.get(`${url}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);
     } catch (e) {

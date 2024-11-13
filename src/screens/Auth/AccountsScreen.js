@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Option from '../../components/Option';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
+import {API_URL} from '@env';
 
 const AccountScreen = () => {
   const insets = useSafeAreaInsets();
@@ -16,16 +17,14 @@ const AccountScreen = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [count, setCount] = useState(0)
-  const url = "https://api.rentbeta.fanya.ug/api/v1"
 
   useEffect(() => {
     useGetTicketDetails()
-
   }, [])
 
   const useGetTicketDetails = async () => {
     try {
-        const response = await axios.get(`${url}/accounts/users/has_schedule?tenant_id=${user.id}`);
+        const response = await axios.get(`${API_URL}/accounts/users/has_schedule?tenant_id=${user.id}`);
         setCount(response.data.data)
     } catch (e) {
         console.log("Fetch ticket details failed");
@@ -65,7 +64,7 @@ const AccountScreen = () => {
                   <View>
                     <Text style={styles.trackerCardh5} h3>{user.first_name} {user.last_name}</Text>
                     <Text style={styles.trackerCardh2} h5>{user.tenant_number}</Text>
-                    <Text style={styles.trackerCardh5} h5>+256{user.phone_number}</Text>
+                    <Text style={styles.trackerCardh5} h5>{user.username}</Text>
                   </View>
                 </View>
                 <View style={{alignSelf: "center"}}>

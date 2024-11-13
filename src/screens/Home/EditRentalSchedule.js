@@ -11,6 +11,7 @@ import { Button } from 'react-native-elements';
 import { useSelector, useDispatch } from "react-redux";
 import { setScheduleDate } from "../../store/authslice";
 import DatePicker from "../../components/DatePicker";
+import {API_URL} from '@env';
 
 const EditRentalScheduleScreen = ({navigation}) => {
   const [unitName, setUnitName] = useState("");
@@ -37,7 +38,7 @@ const EditRentalScheduleScreen = ({navigation}) => {
       setLoadingScheduleCall(true)
       const convertedDate = new Date(date)
       const formattedDate = formatDate(convertedDate)
-      const response = await axios.post("https://api.rentbeta.iolabsug.com/api/v1/tenants/schedule/create", { "tenant_id": user.id, "unit_name": unitName, "unit_type": "REGULAR", "unit_rent": unitRent, "unit_rent_currency": "UGX", "unit_rent_cycle": "MONTHLY", "date_started": formattedDate });
+      const response = await axios.post(`${API_URL}/tenants/schedule/create`, { "tenant_id": user.id, "unit_name": unitName, "unit_type": "REGULAR", "unit_rent": unitRent, "unit_rent_currency": "UGX", "unit_rent_cycle": "MONTHLY", "date_started": formattedDate });
       navigation.navigate("ScheduleList");
     } catch (err) {
       console.log(err)

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Button, Input } from 'react-native-elements';
 
-const OtpScreen = ({navigation}) => {
+const OtpScreens = ({navigation}) => {
     const [otp, setOtp] = useState('');
 
     return(
@@ -62,4 +62,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default OtpScreen;
+export default OtpScreens;

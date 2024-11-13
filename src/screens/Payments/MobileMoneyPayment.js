@@ -8,6 +8,7 @@ import PhoneInput from 'react-native-international-phone-number';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { setPaymentId } from '../../store/authslice';
+import {API_URL} from '@env';
 
 const MobileMoneyPayment = () => {
     const navigation = useNavigation()
@@ -28,7 +29,7 @@ const MobileMoneyPayment = () => {
 
     const fetchPaymentSettings = async () => {
       try {
-          const response = await axios.get(`https://api.rentbeta.fanya.ug/api/v1/tenants/payments/settings`);
+          const response = await axios.get(`${API_URL}/tenants/payments/settings`);
           setFees(response.data.data);
           setLoadingFees(false);
       } catch (e) {
@@ -60,7 +61,7 @@ const MobileMoneyPayment = () => {
           setLoadingPaymentCall(true)
           const unPhone = selectedCountry.callingCode+inputValue
           const phoneNumber = unPhone.replaceAll(" ", "")
-          const response = await axios.post("https://api.rentbeta.fanya.ug/api/v1/tenants/payments", { "related_rental_unit": unit_id, "related_tenant": user.id, "phone_number": phoneNumber, "amount": amount });
+          const response = await axios.post(`${API_URL}/tenants/payments`, { "related_rental_unit": unit_id, "related_tenant": user.id, "phone_number": phoneNumber, "amount": amount });
           if(response.data.status === 200) {
             dispatch(setPaymentId(response.data.data.id))
             setTimeout(() => {

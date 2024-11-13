@@ -1,10 +1,6 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Dimensions,
-} from "react-native";
+import { StyleSheet, View, Dimensions} from "react-native";
+import {Text} from "react-native-elements";
 import YellowButton from "./YellowButton";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
@@ -30,7 +26,7 @@ function BottomModal({ navigation }) {
 
   return (
     <>
-      <Text style={styles.label}>Confirm that you have input your pin</Text>
+      <Text h4Style={styles.label} h4>Confirm that you have input your pin</Text>
         <View style={styles.timer_wrapper}>
         <CountdownCircleTimer
                 isPlaying
@@ -58,7 +54,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 500,
     marginBottom: 16,
     // color: PRIMARY_COLOR,
   },

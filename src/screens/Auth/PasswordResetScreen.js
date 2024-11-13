@@ -76,7 +76,6 @@ const PasswordResetScreen = ({navigation}) => {
       }
       setLoadingSubmit(false)
     } catch (err) {
-      console.log(err)
       setErrorMessage("Failed")
       setLoadingSubmit(false)
     }
@@ -178,7 +177,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 15,
-    borderStyle: "1px solid black",
   },
   input: {
     flex:3,

@@ -18,32 +18,23 @@ const AccountDetailsScreen = ({navigation}) => {
         backgroundColor: "#F0ECE6"}}
     >
         <View style={styles.container}>
-            <Avatar
-                size="large"
-                rounded
-                title="AV"
-                onPress={() => console.log("Works!")}
-                activeOpacity={0.7}
-                containerStyle={{backgroundColor: "#FCB200", alignSelf: "center", marginTop: 10 }}
-            />
-
             {user ? (
                 <Card containerStyle={styles.optionsCard}>
                 <View>
                     <Text h5 style={styles.h5Text}>FIRST NAME</Text>
-                    <Text h5 style={styles.h4Text}>{user.first_name}</Text>
+                    <Text h5 style={styles.h4Text}>{user?.first_name}</Text>
                     <Card.Divider/>
                     <Text h5 style={styles.h5Text}>LAST NAME</Text>
-                    <Text h5 style={styles.h4Text}>{user.last_name}</Text>                   
+                    <Text h5 style={styles.h4Text}>{user?.last_name}</Text>                   
                     <Card.Divider/>
                     <Text h5 style={styles.h5Text}>TENANT ID</Text>
-                    <Text h5 style={styles.h4Text}>{user.tenant_number}</Text>
+                    <Text h5 style={styles.h4Text}>{user?.tenant_number}</Text>
                     <Card.Divider/>
                     <Text h5 style={styles.h5Text}>PHONE NUMBER</Text>
-                    <Text h5 style={styles.h4Text}>+256 {user.phone_number}</Text>
+                    <Text h5 style={styles.h4Text}>+256 {user?.phone_number}</Text>
                     <Card.Divider />
                     <Text h5 style={styles.h5Text}>EMAIL</Text>
-                    <Text h5 style={styles.h4Text}>{user.email}</Text>
+                    <Text h5 style={styles.h4Text}>{user?.email}</Text>
                     <Card.Divider/>
                     <TouchableOpacity onPress={() => navigation.navigate("AccountDelete")}>
                         <View style={styles.deleteView}>

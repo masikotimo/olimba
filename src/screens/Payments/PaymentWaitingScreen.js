@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useInterval } from '../../utilities/useInterval';
 import { Text } from 'react-native-elements';
 import { useSelector } from "react-redux";
+import {API_URL} from '@env';
 
 const PaymentWaitingScreen = ({navigation}) => {
     const [status, setStatus] = useState("")
@@ -15,7 +16,7 @@ const PaymentWaitingScreen = ({navigation}) => {
 
     const fetchPaymentStatus = async () => {
         try {
-            const response = await axios.post(`https://api.rentbeta.fanya.ug/api/v1/tenants/payments/status`, {"id": payId});
+            const response = await axios.post(`${API_URL}/tenants/payments/status`, {"id": payId});
             if(response.data.status === 500){
                 setStatusError(true)
                 setStatus("Insufficient Funds, Please try again");

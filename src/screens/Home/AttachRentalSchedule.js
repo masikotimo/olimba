@@ -3,13 +3,10 @@ import axios from 'axios';
 import {Text, StyleSheet, ScrollView, TextInput, View} from "react-native";
 import { Button } from 'react-native-elements';
 import { useSelector, useDispatch } from "react-redux";
-import { setScheduleDate } from "../../store/authslice";
-import DatePickerComponent from "../../components/DatePicker";
 import {API_URL} from '@env';
 
 const RentScheduleScreen = ({navigation}) => {
-  const [unitName, setUnitName] = useState("");
-  const [unitRent, setUnitRent] = useState("");
+  const [unitId, setUnitId] = useState("");
   const user = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -32,33 +29,12 @@ const RentScheduleScreen = ({navigation}) => {
       setLoadingScheduleCall(true)
       const convertedDate = new Date(date)
       const formattedDate = formatDate(convertedDate)
-      const response = await axios.post(`${API_URL}/tenants/schedule/create`, { "tenant_id": user.id, "unit_name": unitName, "unit_type": "REGULAR", "unit_rent": unitRent, "unit_rent_currency": "UGX", "unit_rent_cycle": "MONTHLY", "date_started": formattedDate });
+      const response = await axios.post(`${API_URL}/tenants/schedule/create`, { "tenant_id": user.id, "unit_id": unitId });
       navigation.navigate("ScheduleList");
     } catch (err) {
       setErrorMessage("Schedule Addition Failed")
       setLoadingScheduleCall(false)
     }
-  };
-
-  const formatStringDate = (date) => {
-    const formattedDate = date?.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-    return formattedDate
-  }
-
-  const onDateChange = (selectedDate) => {
-    const date = selectedDate?.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-    date && dispatch(setScheduleDate(date))
-    // selectedDate && setDateSelected(selectedDate);
   };
 
 
@@ -82,24 +58,6 @@ const RentScheduleScreen = ({navigation}) => {
         />
       </View>
 
-      <View style={styles.dateContainer}>
-        <Text style={styles.disclaimer}>Select a date when your next rent payment is due. This date should be within the next 60 days from today</Text>
-
-        <View style={styles.pickerContainer}>
-          <Text style={styles.information}>Select Date: </Text>
-          <DatePickerComponent
-            setOpen={setOpen}
-            setDate={setDate}
-            open={open}
-          />
-          <Button
-            buttonStyle={styles.scheduleButton}
-            title={formatStringDate(date)}
-            onPress={() => setOpen(true)}
-          />
-        </View>
-      </View>
-
       {errorMessage ? (
           <Text style={styles.errorMessage}>{errorMessage}</Text>
       ) : null}
@@ -115,7 +73,7 @@ const RentScheduleScreen = ({navigation}) => {
           <Button
             buttonStyle={styles.buttonStyle}
             title="Add Rent Schedule"
-            onPress={() => addRentalSchedule({ unitName, unitRent, date })}
+            onPress={() => addRentalSchedule({ tenantId, unitId })}
           />
       )}
 

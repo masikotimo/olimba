@@ -5,6 +5,7 @@ import { Text } from 'react-native-elements';
 import TicketsCard from '../../components/TicketsCard';
 import { useSelector, useDispatch } from "react-redux";
 import axios from 'axios';
+import {API_URL} from '@env';
 
 const TicketVerboseListScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
@@ -20,7 +21,7 @@ const TicketVerboseListScreen = ({navigation}) => {
 		const fetchData = async () => {
 			try {
 
-          const response = await axios.get(`https://api.rentbeta.iolabsug.com/api/v1/tenants/tickets?tenant_id=${user.id}`);
+          const response = await axios.get(`${API_URL}/tenants/tickets?tenant_id=${user.id}`);
           setRentalTickets(response.data.data);
           setLoadingRentalTickets(false);
         } catch (e) {

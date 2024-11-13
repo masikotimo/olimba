@@ -9,7 +9,7 @@ const Option = ({onPress, optionText, link}) => {
             onPress={onPress}
         >
             <View style={styles.container}>
-                <Text h5 style={styles.text}>{optionText}</Text>
+                <Text h5Style={styles.text} h5>{optionText}</Text>
                 <Icon
                     name="arrow-right"
                     size={25}
