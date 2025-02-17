@@ -1,4 +1,6 @@
 import React, { useContext, useEffect } from "react";
+import { ToastProvider } from 'react-native-toast-notifications'
+import axiosInstance from "./src/api/axiosInstance";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -51,7 +53,7 @@ import InsuranceRequestScreen from "./src/screens/Insurance/InsuranceRequestScre
 import UtilitiesListScreen from "./src/screens/Utilities/UtilitiesList";
 
 import { useDispatch, useSelector } from "react-redux";
-import { setLogin, setUnitId } from "./src/store/authslice";
+import { setLogin, setUnitId, setLogout } from "./src/store/authslice";
 
 import { Provider } from "react-redux";
 import { store } from "./src/store/store";
@@ -216,6 +218,34 @@ const NavigationComponent = () => {
 }
 
 function App () {
+  axiosInstance.interceptors.request.use(async request => {
+    const accessToken = await AsyncStorage.getItem("token")
+    if (accessToken) {
+        request.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+        return request;
+    }, error => {
+    return Promise.reject(error);
+  });
+
+  axiosInstance.interceptors.response.use(
+    response => response, // Directly return successful responses.
+    async error => {
+      const originalRequest = error.config;
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
+        // Handle refresh token errors by clearing stored tokens and redirecting to the login page.
+        console.error('Token refresh failed:', refreshError);
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user_details');
+        dispatch(setLogout())
+        navigation.navigate("Otp");
+        return Promise.reject(refreshError);
+      }
+      return Promise.reject(error); // For all other errors, return the error as is.
+    }
+  );
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -228,7 +258,9 @@ function App () {
 export default () => {
   return (
     <Provider store={store}>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </Provider>
   )
 }

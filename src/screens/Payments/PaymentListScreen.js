@@ -8,22 +8,20 @@ import { AntDesign } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { dateFormatter } from '../../utilities/dateFormatter';
 import { setPaymentDetails } from '../../store/authslice';
-import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
 
 const PaymentListScreen = ({navigation}) => {
     const insets = useSafeAreaInsets();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
-    const token = useSelector((state) => state.auth.token);
     const unit = useSelector((state) => state.auth.unit_id)
-	axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 	const [rentalPayments, setRentalPayments] = useState([]);
     const [isLoadingRentalPayments, setLoadingRentalPayments] = useState(true);
 	const [paymentsError, setPaymentsError] = useState(false);
 
     const fetchPayments = async () => {
         try {
-            const response = await axios.get(`${API_URL}/tenants/payments?tenant_id=${user.id}`);
+            const response = await axiosInstance.get(`/tenants/payments?tenant_id=${user.id}`);
             setRentalPayments(response.data.data);
             setLoadingRentalPayments(false);
         } catch (e) {

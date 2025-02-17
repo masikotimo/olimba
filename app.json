@@ -18,6 +18,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rentbeta.africa",
       "buildNumber": "2"
+
     },
     "android": {
       "adaptiveIcon": {

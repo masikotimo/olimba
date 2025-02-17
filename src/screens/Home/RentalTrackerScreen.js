@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import axios from 'axios';
 import { View, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator} from 'react-native';
-import { Text, Button, Card } from 'react-native-elements';
+import { Text, Button, Card, Skeleton } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import moment from "moment";
 import { AntDesign } from '@expo/vector-icons';
@@ -13,7 +12,8 @@ import { setUnitId, setUnitName } from '../../store/authslice';
 import NetworkStatus from '../../components/NetworkStatus';
 import { StatusBar } from 'expo-status-bar';
 import { currencyFormatter } from '../../utilities/currencyFormatter';
-import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
+
 
 const RentalTrackerScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
@@ -25,8 +25,6 @@ const RentalTrackerScreen = ({navigation}) => {
   const [rentals, setRentals] = useState([])
   const [isLoadingRentals, setLoadingRentals] = useState(true);
 	const [error, setError] = useState(false);
-  const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const unit_id = useSelector((state) => state.auth.unit_id);
   const unit_name = useSelector((state) => state.auth.unit_name);
   const user = useSelector((state) => state.auth.user);
@@ -36,7 +34,8 @@ const RentalTrackerScreen = ({navigation}) => {
   const useGetOccupancyDetails = async () => {    
     try {
       setLoadingOccupancyDetails(true)
-      const response = await axios.post(`${API_URL}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
+      // const response = await axios.post(`${API_URL}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
+      const response = await axiosInstance.post(`/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
       setOccupancyDetails(response.data.data);
       if(response.data.data.rate === 0){
         setColor("#82ed9f")
@@ -52,7 +51,6 @@ const RentalTrackerScreen = ({navigation}) => {
       }
       setLoadingOccupancyDetails(false);
     } catch (e) {
-      console.log(e)
       setOccupancyError(true);
       setLoadingOccupancyDetails(false);
     }
@@ -60,7 +58,8 @@ const RentalTrackerScreen = ({navigation}) => {
 
   const useGetOccupancyList = async () => {    
     try {
-      const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      // const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      const response = await axiosInstance.get(`/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);
     } catch (e) {
@@ -79,7 +78,7 @@ const RentalTrackerScreen = ({navigation}) => {
     })
 
     return unsubscribe
-  }, [navigation, unit_id])
+  }, [navigation, unit_id, refreshing])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

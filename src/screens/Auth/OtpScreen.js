@@ -1,12 +1,13 @@
 import React, {useState, useRef, useEffect} from 'react';
+import { useToast } from "react-native-toast-notifications";
 import PropTypes from 'prop-types';
-import {StyleSheet, View, ActivityIndicator, TextInput, ScrollView, Text} from 'react-native';
+import {StyleSheet, View, ActivityIndicator, TextInput, ScrollView, Text, TouchableOpacity} from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from "react-redux";
 import { setLogin, setUnitId, setUnitName, setIsReset } from '../../store/authslice';
-import backendApi from "../../api/backend";
+import backend from '../../api/backend';
 // import RNOtpVerify from 'react-native-otp-verify';
 
 import { isAndroid, logErrorWithMessage } from '../../utilities/helperFunctions';
@@ -20,6 +21,7 @@ let autoSubmitOtpTimerInterval;
 
 const OtpScreen = (props) => {
   const {otpRequestData, attempts} = props;
+  const toast = useToast();
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch()
   const userSignUp = useSelector((state) => state.auth.userSignUp);
@@ -161,25 +163,30 @@ const OtpScreen = (props) => {
   };
 
   const onSubmitButtonPress = async () => {
-    // try {
-    setLoadingSignIn(true)
-    let otpUnclean = otpArray.toString()
-    let otp_code = otpUnclean.replaceAll(",", "")
-    
-    const url = "/accounts/otp/verify"
-    const response = await backendApi.post(url, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
-    dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
-    dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
-    dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
-    setLoadingSignIn(false)
-    await AsyncStorage.setItem("token", response.data.data.token.token);
-    await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
-    await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
-    // } catch (err) {
-    //   console.log(err)
-    //   setErrorMessage("Invalid OTP, Please use the correct OTP")
-    //   setLoadingSignIn(false)
-    // }
+    try {
+      setLoadingSignIn(true)
+      let otpUnclean = otpArray.toString()
+      let otp_code = otpUnclean.replaceAll(",", "")
+      
+      const url = "/accounts/otp/verify"
+      const response = await backend.post(`/accounts/otp/verify`, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
+      dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
+      dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
+      dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
+      setLoadingSignIn(false)
+      await AsyncStorage.setItem("token", response.data.data.token.token);
+      await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
+      await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+    } catch (err) {
+      toast.show("Invalid OTP, Please use the correct OTP", {
+        type: "danger",
+        placement: "top",
+        duration: 4000,
+        offset: 1000,
+        animationType: "slide-in",
+      });
+      setLoadingSignIn(false)
+    }
   };
 
   // this event won't be fired when text changes from '' to '' i.e. backspace is pressed
@@ -243,6 +250,7 @@ const OtpScreen = (props) => {
         paddingLeft: insets.left,
         paddingRight: insets.right,
         backgroundColor: "white"}}
+        keyboardShouldPersistTaps="always"
     >
         <View style={styles.container}>
             <Text style={{fontSize: 16}}>
@@ -276,11 +284,10 @@ const OtpScreen = (props) => {
                 </View>
                 ))}
             </View>
-          {errorMessage ? (
-            <Text>
-              {errorMessage}
-            </Text>
-          ) : null}
+
+          <TouchableOpacity>
+            <Text>Resend OTP</Text>
+          </TouchableOpacity>
           {/* {resendButtonDisabledTime > 0 ? (
             <TimerText text={'Resend OTP in'} time={resendButtonDisabledTime} />
           ) : ( */}
@@ -367,19 +374,5 @@ const styles = StyleSheet.create({
     marginRight: 15
   },
 });
-
-OtpScreen.defaultProps = {
-  attempts: 5,
-  otpRequestData: {
-    username: 'varunon9',
-    email_id: false,
-    phone_no: true,
-  },
-};
-
-OtpScreen.propTypes = {
-  otpRequestData: PropTypes.object.isRequired,
-  attempts: PropTypes.number.isRequired,
-};
 
 export default OtpScreen;
