@@ -16,6 +16,7 @@
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		C6618618CA5CF3BF110F4896 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5E1061710FBF89D7ABEE6B58 /* PrivacyInfo.xcprivacy */; };
 		DDFAC9633BC93B2DF861B91D /* libPods-RentBeta.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96BA735C7AADB06052BC049A /* libPods-RentBeta.a */; };
+		097E92D0F455412C8C2BF9AB /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5FA703354BE4196A876B226 /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,8 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED3C3A78E21FAFF7B60535B2 /* Pods-RentBeta.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RentBeta.release.xcconfig"; path = "Target Support Files/Pods-RentBeta/Pods-RentBeta.release.xcconfig"; sourceTree = "<group>"; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RentBeta/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		F5FA703354BE4196A876B226 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "rentbeta/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		CCE82E3923764B2FA6969D21 /* SplashScreen.storyboard */ = {isa = PBXFileReference; name = "SplashScreen.storyboard"; path = "rentbeta/SplashScreen.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +94,8 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+				F5FA703354BE4196A876B226 /* noop-file.swift */,
+				CCE82E3923764B2FA6969D21 /* SplashScreen.storyboard */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -204,6 +209,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				C6618618CA5CF3BF110F4896 /* PrivacyInfo.xcprivacy in Resources */,
+				EB4CC2FA410E48B0B852AA64 /* SplashScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +377,7 @@
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
 				8C95A16ED94E4CB38C781FD9 /* noop-file.swift in Sources */,
+				097E92D0F455412C8C2BF9AB /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -406,7 +413,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.rentbeta.africa;
-				PRODUCT_NAME = RentBeta;
+				PRODUCT_NAME = "RentBeta";
 				SWIFT_OBJC_BRIDGING_HEADER = "RentBeta/RentBeta-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -439,7 +446,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.rentbeta.africa;
-				PRODUCT_NAME = RentBeta;
+				PRODUCT_NAME = "RentBeta";
 				SWIFT_OBJC_BRIDGING_HEADER = "RentBeta/RentBeta-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
