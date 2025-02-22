@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 const RentalSchedulePaymentsDetailsScreen = () => {
   const insets = useSafeAreaInsets();
   const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     return (
         <ScrollView style={{

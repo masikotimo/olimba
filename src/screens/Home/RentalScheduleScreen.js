@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import {Text, StyleSheet, ScrollView, TextInput, View} from "react-native";
 import { Button } from 'react-native-elements';
 import { useSelector, useDispatch } from "react-redux";
@@ -12,7 +12,6 @@ const RentScheduleScreen = ({navigation}) => {
   const [unitRent, setUnitRent] = useState("");
   const user = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const [loadingScheduleCall, setLoadingScheduleCall] = useState(false)
   const [status, setStatus] = useState(false);
   const [open, setOpen] = useState(false)
@@ -32,7 +31,15 @@ const RentScheduleScreen = ({navigation}) => {
       setLoadingScheduleCall(true)
       const convertedDate = new Date(date)
       const formattedDate = formatDate(convertedDate)
-      const response = await axios.post(`${API_URL}/tenants/schedule/create`, { "tenant_id": user.id, "unit_name": unitName, "unit_type": "REGULAR", "unit_rent": unitRent, "unit_rent_currency": "UGX", "unit_rent_cycle": "MONTHLY", "date_started": formattedDate });
+      const response = await axiosInstance.post(`/tenants/schedule/create`, { 
+        "tenant_id": user.id, 
+        "unit_name": unitName, 
+        "unit_type": "REGULAR", 
+        "unit_rent": unitRent, 
+        "unit_rent_currency": "UGX", 
+        "unit_rent_cycle": "MONTHLY", 
+        "date_started": formattedDate 
+      });
       navigation.navigate("ScheduleList");
     } catch (err) {
       setErrorMessage("Schedule Addition Failed")

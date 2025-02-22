@@ -1,22 +1,20 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet, View, ScrollView, ActivityIndicator, Button } from 'react-native';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { useInterval } from '../../utilities/useInterval';
 import { Text } from 'react-native-elements';
 import { useSelector } from "react-redux";
-import {API_URL} from '@env';
 
 const PaymentWaitingScreen = ({navigation}) => {
     const [status, setStatus] = useState("")
     const [loadingStatus, setLoadingStatus] = useState("");
     const [statusError, setStatusError] = useState(false)
     const token = useSelector((state) => state.auth.token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     const payId = useSelector((state) => state.auth.paymentId);
 
     const fetchPaymentStatus = async () => {
         try {
-            const response = await axios.post(`${API_URL}/tenants/payments/status`, {"id": payId});
+            const response = await axiosInstance.post('/tenants/payments/status', {"id": payId});
             if(response.data.status === 500){
                 setStatusError(true)
                 setStatus("Insufficient Funds, Please try again");

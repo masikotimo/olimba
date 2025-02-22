@@ -7,6 +7,7 @@ import { Text, Button, Card } from 'react-native-elements';
 import SearchBar from '../../components/SearchBar';
 import PropertyCardTop from '../../components/PropertyCardTop';
 import { AntDesign } from '@expo/vector-icons'; 
+import axiosInstance from '../../api/axiosInstance';
 
 const PropertyDiscoverScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
@@ -15,16 +16,15 @@ const PropertyDiscoverScreen = ({navigation}) => {
   const [loadingResults, setLoadingResults] = useState(false)
   const [error, setError] = useState(false);
   const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
   const useGetHouses = async () => {    
     try {
-      // const response = await axios.get(`https://api.rentbeta.iolabsug.com/api/v1/tenants/houses`);
-      setResults([]);
-      setLoadingResults(false);
+        // const response = await axiosInstance.get(`/api/v1/tenants/houses`);
+        setResults([]);
+        setLoadingResults(false);
     } catch (e) {
-      setError(true);
-      setLoadingResults(false);
+        setError(true);
+        setLoadingResults(false);
     }
   }
 

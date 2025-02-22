@@ -34,8 +34,10 @@ const RentalTrackerScreen = ({navigation}) => {
   const useGetOccupancyDetails = async () => {    
     try {
       setLoadingOccupancyDetails(true)
-      // const response = await axios.post(`${API_URL}/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
-      const response = await axiosInstance.post(`/tenants/occupancy`, {"tenant_id": user.id, "unit_id": unit_id});
+      const response = await axiosInstance.post(`/tenants/occupancy`, {
+        "tenant_id": user.id, 
+        "unit_id": unit_id
+      });
       setOccupancyDetails(response.data.data);
       if(response.data.data.rate === 0){
         setColor("#82ed9f")
@@ -58,7 +60,6 @@ const RentalTrackerScreen = ({navigation}) => {
 
   const useGetOccupancyList = async () => {    
     try {
-      // const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       const response = await axiosInstance.get(`/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);

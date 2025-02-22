@@ -10,6 +10,7 @@ import Option from '../../components/Option';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
 
 const AccountScreen = () => {
   const insets = useSafeAreaInsets();
@@ -24,7 +25,7 @@ const AccountScreen = () => {
 
   const useGetTicketDetails = async () => {
     try {
-        const response = await axios.get(`${API_URL}/accounts/users/has_schedule?tenant_id=${user.id}`);
+        const response = await axiosInstance.get(`/accounts/users/has_schedule?tenant_id=${user.id}`);
         setCount(response.data.data)
     } catch (e) {
         console.log("Fetch ticket details failed");

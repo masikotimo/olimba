@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, TextInput, ActivityIndicator } from 'react-native';
-import axios from 'axios';
 import { Text, Button } from 'react-native-elements';
 import PhoneInput from 'react-native-international-phone-number';
 import { setPhoneNumber, setUserSignUp } from '../../store/authslice';
 import { useDispatch } from "react-redux";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { StatusBar } from 'expo-status-bar';
-import backend from '../../api/backend';
+import axiosInstance from '../../api/axiosInstance';
 
 const SigninScreen = ({navigation}) => {
   const [errors, setErrors] = useState({}); 
@@ -25,11 +24,6 @@ const SigninScreen = ({navigation}) => {
   const [fieldActive, setFieldActive] = useState(false)
   const [detailsVerified, setDetailsVerified] = useState(false)
 
-  axios.interceptors.request.use(config => {
-    delete config.headers['Authorization'];
-    return config;
-  });
-
   function handleSelectedCountry(country) {
     setSelectedCountry(country);
   }
@@ -44,9 +38,10 @@ const SigninScreen = ({navigation}) => {
         setLoadingUserDetails(true)
         const phoneNumber = selectedCountry.callingCode+phone
         const unSpacedNumber = phoneNumber.replaceAll(" ", "")
-        // const response = await backendApi.post("/accounts/users/details", { "phone_number": unSpacedNumber});
 
-        const response = await backend.post(`/accounts/users/details`, { "phone_number": unSpacedNumber})
+        const response = await axiosInstance.post(`/accounts/users/details`, { 
+            "phone_number": unSpacedNumber
+        });
 
         if(response.data.status === 206){
             setLoadingUserDetails(false)
@@ -106,7 +101,7 @@ const SigninScreen = ({navigation}) => {
     const phoneNumber = inputValue.replaceAll(" ", "")
     if (isFormValid) { 
       try {
-        const response = await backend.post(`/accounts/tenants/create`, {"first_name": firstname, "last_name":lastname, "phone_number":phoneNumber, "username": unUsername });
+        const response = await axiosInstance.post(`/accounts/tenants/create`, {"first_name": firstname, "last_name":lastname, "phone_number":phoneNumber, "username": unUsername });
         dispatch(setUserSignUp(response.data.data))
         navigation.navigate("Otp");
       } catch (err) {
@@ -117,23 +112,24 @@ const SigninScreen = ({navigation}) => {
 
   const signin = async ({ selectedCountry, inputValue }) => {
     try {
-      setLoadingSignIn(true);
-      const phoneNumber = selectedCountry.callingCode+inputValue;
-      const unSpacedNumber = phoneNumber.replaceAll(" ", "");
-      const response = await backend.post(`/accounts/authenticate/tenant`, { "phone_number": unSpacedNumber });
+        setLoadingSignIn(true);
+        const phoneNumber = selectedCountry.callingCode+inputValue;
+        const unSpacedNumber = phoneNumber.replaceAll(" ", "");
+        const response = await axiosInstance.post(`/accounts/authenticate/tenant`, { 
+            "phone_number": unSpacedNumber 
+        });
 
-      if(response.data.status === 200){
-        dispatch(setUserSignUp(response.data.data.user_details));
-        setLoadingSignIn(false)
-        navigation.navigate("Otp");
-      } else if (response.data.status === 404){
-        setErrorMessage("Other Error")
-        setLoadingSignIn(false)
-      }
-      
+        if(response.data.status === 200){
+            dispatch(setUserSignUp(response.data.data.user_details));
+            setLoadingSignIn(false)
+            navigation.navigate("Otp");
+        } else if (response.data.status === 404){
+            setErrorMessage("Other Error")
+            setLoadingSignIn(false)
+        }
     } catch (err) {
-      setErrorMessage("Invalid Username or Password");
-      setLoadingSignIn(false)
+        setErrorMessage("Invalid Username or Password");
+        setLoadingSignIn(false)
     }
   };
 

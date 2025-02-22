@@ -5,15 +5,13 @@ import { Text, Button, Card } from 'react-native-elements';
 import TicketsCard from '../../components/TicketsCard';
 import { useSelector, useDispatch } from "react-redux";
 import { setTicketId } from '../../store/authslice';
-import axios from 'axios';
-import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
 
 const TicketListScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch()
   const user = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
-	axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 	const [rentalTickets, setRentalTickets] = useState([]);
 	const [isLoadingRentalTickets, setLoadingRentalTickets] = useState(true);
 	const [ticketsError, setTicketsError] = useState(false);
@@ -21,13 +19,13 @@ const TicketListScreen = ({navigation}) => {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-          const response = await axios.get(`${API_URL}/tenants/tickets?tenant_id=${user.id}`);
-          setRentalTickets(response.data.data);
-          setLoadingRentalTickets(false);
-        } catch (e) {
-          setTicketsError(true);
-          setLoadingRentalTickets(false);
-        }
+				const response = await axiosInstance.get(`/tenants/tickets?tenant_id=${user.id}`);
+				setRentalTickets(response.data.data);
+				setLoadingRentalTickets(false);
+			} catch (e) {
+				setTicketsError(true);
+				setLoadingRentalTickets(false);
+			}
 		};
 
     const unsubscribe = navigation.addListener('focus', () => {

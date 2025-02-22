@@ -1,11 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import axios from 'axios';
 import { View, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { Text, Button, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TicketUpdateCard from '../../components/TicketUpdateCard';
 import { useSelector } from 'react-redux';
-import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
 
 const TicketDetailsScreen = () => {
   const insets = useSafeAreaInsets();
@@ -13,7 +12,6 @@ const TicketDetailsScreen = () => {
   const ticketId = useSelector((state) => state.auth.ticketId)
   const [ticketDetails, setTicketDetails] = useState([])
   const [isLoadingTicketDetails, setLoadingTicketDetails] = useState(true)
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
   const formatDate = (date) => {
     const convertedDate = new Date(date)
@@ -25,7 +23,7 @@ const TicketDetailsScreen = () => {
   
   const fetchTicketDetails = async () => {
     try {
-        const response = await axios.get(`${API_URL}/tenants/tickets/single?ticket_id=${ticketId}`);
+        const response = await axiosInstance.get(`/tenants/tickets/single?ticket_id=${ticketId}`);
         setTicketDetails(response.data.data);
         setLoadingTicketDetails(false);
     } catch (e) {

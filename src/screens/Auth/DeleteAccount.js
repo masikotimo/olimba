@@ -2,11 +2,11 @@ import React, {useState} from 'react';
 import { View, StyleSheet, Text, ScrollView, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
 import { useSelector } from "react-redux";
-import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setLogout } from '../../store/authslice';
 import { useDispatch } from 'react-redux';
 import {API_URL} from '@env';
+import axiosInstance from '../../api/axiosInstance';
 
 const DeleteAccountScreen = ({navigation}) => {
   const [reason, setReason] = useState("");
@@ -16,7 +16,6 @@ const DeleteAccountScreen = ({navigation}) => {
   const [loadingDeleteCall, setLoadingDeleteCall] = useState(false)
   const user = useSelector((state) => state.auth.user);
   const token = useSelector((state) => state.auth.token);
-	axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const dispatch = useDispatch();
 
   const validateUsername = (event) => {
@@ -33,7 +32,10 @@ const DeleteAccountScreen = ({navigation}) => {
   const performDelete = async () => {
     try {
       setLoadingDeleteCall(true)
-      const response = await axios.post(`${API_URL}/accounts/tenants/schedule_delete`, { "username": username, "reason": reason});
+      const response = await axiosInstance.post(`/accounts/tenants/schedule_delete`, {
+        "username": username,
+        "reason": reason
+      });
       if(response.data.status === 200 || response.data.status === 404) {
         dispatch(setLogout())
         await AsyncStorage.removeItem('token')
@@ -45,7 +47,7 @@ const DeleteAccountScreen = ({navigation}) => {
       setLoadingDeleteCall(false)
       setErrorMessage("Delete Failed")
     }
-};
+  };
 
   return(
     <ScrollView style={styles.formContainer}>

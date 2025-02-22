@@ -1,7 +1,5 @@
 import React, { useContext, useEffect } from "react";
 import { ToastProvider } from 'react-native-toast-notifications'
-import axiosInstance from "./src/api/axiosInstance";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
@@ -184,6 +182,7 @@ function MyTabs() {
 const NavigationComponent = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
   const checkUser = async () => {
     try {
       const token = await AsyncStorage.getItem("token")
@@ -195,10 +194,9 @@ const NavigationComponent = () => {
           dispatch(setLogin({ user: details, token: token }));
           dispatch(setUnitId(unit_id));
         }
-        
       }
     } catch (error) {
-      
+      console.error('Error checking user session:', error);
     }
   }
 
@@ -207,45 +205,17 @@ const NavigationComponent = () => {
   }, [])
 
   return (
-      <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-        {!isLoggedIn ? (
-          <Stack.Screen name="Auth" component={AuthScreens} />
-        ) : (
-          <Stack.Screen name="Tabs" component={MyTabs} />
-        )}
-      </Stack.Navigator>
+    <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
+      {!isLoggedIn ? (
+        <Stack.Screen name="Auth" component={AuthScreens} />
+      ) : (
+        <Stack.Screen name="Tabs" component={MyTabs} />
+      )}
+    </Stack.Navigator>
   )
 }
 
-function App () {
-  axiosInstance.interceptors.request.use(async request => {
-    const accessToken = await AsyncStorage.getItem("token")
-    if (accessToken) {
-        request.headers['Authorization'] = `Bearer ${accessToken}`;
-    }
-        return request;
-    }, error => {
-    return Promise.reject(error);
-  });
-
-  axiosInstance.interceptors.response.use(
-    response => response, // Directly return successful responses.
-    async error => {
-      const originalRequest = error.config;
-      if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true; // Mark the request as retried to avoid infinite loops.
-        // Handle refresh token errors by clearing stored tokens and redirecting to the login page.
-        console.error('Token refresh failed:', refreshError);
-        await AsyncStorage.removeItem('token');
-        await AsyncStorage.removeItem('user_details');
-        dispatch(setLogout())
-        navigation.navigate("Otp");
-        return Promise.reject(refreshError);
-      }
-      return Promise.reject(error); // For all other errors, return the error as is.
-    }
-  );
-
+function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -253,7 +223,7 @@ function App () {
       </NavigationContainer>
     </SafeAreaProvider>
   );
-};
+}
 
 export default () => {
   return (
@@ -264,4 +234,3 @@ export default () => {
     </Provider>
   )
 }
-

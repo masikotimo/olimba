@@ -4,10 +4,9 @@ import { Text, Button, Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import SelectComponent from '../../components/SelectDropdown';
 import { useSelector, useDispatch } from "react-redux";
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 const titles = ["Electricity", "Water", "Security", "Plumbing", "Others"]
 const severities = [{"name":"Low"}, {"name":"Medium"}, {"name":"High"}, {"name":"Urgent"}]
-import {API_URL} from '@env';
 
 
 const TicketCreateScreen = ({navigation}) => {
@@ -20,14 +19,13 @@ const TicketCreateScreen = ({navigation}) => {
   const [loadingTicketCreate, setLoadingTicketCreate] = useState(false);
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const [rentals, setRentals] = useState([]);
   const [loadingRentals, setLoadingRentals] = useState(false)
   const [isLoadingAddTicket, setLoadingAddTicket] = useState(false);
 
   const useGetOccupancyList = async () => {    
     try {
-      const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+      const response = await axiosInstance.get(`/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
       setRentals(response.data.data);
       setLoadingRentals(false);
     } catch (e) {
@@ -85,15 +83,19 @@ const TicketCreateScreen = ({navigation}) => {
   const submitTicket = async () => {
     try {
       setLoadingTicketCreate(true)
-      const response = await axios.post(`${API_URL}/tenants/tickets`, { "related_rental_unit": unit, "related_tenant": user.id, "title": title, "description": description });
-    //   console.log(response)
+      const response = await axiosInstance.post('/tenants/tickets', { 
+        "related_rental_unit": unit, 
+        "related_tenant": user.id, 
+        "title": title, 
+        "description": description 
+      });
       navigation.navigate("TicketList");
     } catch (err) {
       console.log(err)
       setErrorMessage("Payment Failed")
       setLoadingTicketCreate(false)
     }
-};
+  };
 
   return (
     <View style={styles.container}>

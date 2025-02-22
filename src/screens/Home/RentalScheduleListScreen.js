@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { View, StyleSheet, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Button, Card } from 'react-native-elements';
@@ -15,7 +15,6 @@ const RentalScheduleListScreen = ({navigation}) => {
     const token = useSelector((state) => state.auth.token);
     const unit = useSelector((state) => state.auth.unit_id)
     const dispatch = useDispatch()
-	axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 	const [rentSchedules, setRentSchedules] = useState([]);
     const [loadingRentSchedules, setLoadingRentSchedules] = useState(true)
     const [error, setError] = useState(false)
@@ -30,7 +29,7 @@ const RentalScheduleListScreen = ({navigation}) => {
 
     const fetchRentSchedules = async () => {
         try {
-            const response = await axios.get(`${API_URL}/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
+            const response = await axiosInstance.get(`/tenants/occupancy_list?tenant_id=${user.id}&option=false`);
             setRentSchedules(response.data.data);
             setLoadingRentSchedules(false);
         } catch (e) {

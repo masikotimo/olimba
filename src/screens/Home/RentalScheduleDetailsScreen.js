@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { View, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 import { Text, Button, Card } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +20,6 @@ const RentalScheduleDetailsScreen = () => {
   const unit = schedule.related_rental_unit.id
   const unit_name = schedule.related_rental_unit.unit_name
   const token = useSelector((state) => state.auth.token);
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
   const formatDate = (date) => {
     const convertedDate = new Date(date)
@@ -32,7 +31,7 @@ const RentalScheduleDetailsScreen = () => {
   
   const fetchPayments = async () => {
     try {
-        const response = await axios.get(`${API_URL}/tenants/mark_occupancy?tenant_id=${user.id}&unit_id=${unit}`);
+        const response = await axiosInstance.get(`/tenants/mark_occupancy?tenant_id=${user.id}&unit_id=${unit}`);
         setUnitDetails(response.data.data.unit)
         setPayments(response.data.data.schedules);
         setLoadingRentalPayments(false);
