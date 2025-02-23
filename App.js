@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect,useRef } from "react";
 import { ToastProvider } from 'react-native-toast-notifications'
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -52,6 +52,7 @@ import UtilitiesListScreen from "./src/screens/Utilities/UtilitiesList";
 
 import { useDispatch, useSelector } from "react-redux";
 import { setLogin, setUnitId, setLogout } from "./src/store/authslice";
+import { setNavigationRef } from './src/api/axiosInstance';
 
 import { Provider } from "react-redux";
 import { store } from "./src/store/store";
@@ -216,15 +217,22 @@ const NavigationComponent = () => {
 }
 
 function App() {
+  const navigationRef = useRef(null);
+
+  useEffect(() => {
+    if (navigationRef.current) {
+      setNavigationRef(navigationRef.current);
+    }
+  }, [navigationRef.current]);
+
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <NavigationComponent />
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
-
 export default () => {
   return (
     <Provider store={store}>

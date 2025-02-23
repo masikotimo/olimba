@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@env';
 import { store } from '../store/store';
 import { setLogout } from '../store/authslice';
+import { CommonActions } from '@react-navigation/native';
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
@@ -11,6 +12,13 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Navigation ref to be set from App.js
+let navigationRef = null;
+
+export const setNavigationRef = (ref) => {
+  navigationRef = ref;
+};
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
@@ -47,6 +55,16 @@ axiosInstance.interceptors.response.use(
       
       // Dispatch logout action
       store.dispatch(setLogout());
+
+      // Navigate to auth screen if navigation ref is set
+      if (navigationRef) {
+        navigationRef.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Auth' }],
+          })
+        );
+      }
 
       return Promise.reject(error);
     }
