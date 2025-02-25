@@ -1,0 +1,3 @@
+deployment
+eas build --platform android --profile preview
+make sure you have received the credentials from the developer ie key alias , key password and the  keystore file and the keystore password
