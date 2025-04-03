@@ -7,7 +7,7 @@ import { Button } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from "react-redux";
 import { setLogin, setUnitId, setUnitName, setIsReset } from '../../store/authslice';
-import backend from '../../api/backend';
+import axiosInstance from '../../api/axiosInstance';
 // import RNOtpVerify from 'react-native-otp-verify';
 
 import { isAndroid, logErrorWithMessage } from '../../utilities/helperFunctions';
@@ -164,19 +164,28 @@ const OtpScreen = (props) => {
 
   const onSubmitButtonPress = async () => {
     try {
-      setLoadingSignIn(true)
-      let otpUnclean = otpArray.toString()
-      let otp_code = otpUnclean.replaceAll(",", "")
+      setLoadingSignIn(true);
+      let otpUnclean = otpArray.toString();
+      let otp_code = otpUnclean.replaceAll(",", "");
       
-      const url = "/accounts/otp/verify"
-      const response = await backend.post(`/accounts/otp/verify`, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
+      const url = "/accounts/otp/verify";
+      
+      const response = await axiosInstance.post(url, { "related_user": userSignUp.id, "otp_code": parseInt(otp_code) });
+      
       dispatch(setLogin({ user: response.data.data.user_details, token: response.data.data.token.token }));
-      dispatch(setUnitId(response.data.data.units[0].related_rental_unit.id))
-      dispatch(setUnitName(response.data.data.units[0].related_rental_unit.unit_name))
-      setLoadingSignIn(false)
+      
+      // Check if units exist and are not empty before accessing them
+      const units = response.data.data.units;
+      if (units && units.length > 0) {
+        dispatch(setUnitId(units[0].related_rental_unit.id));
+        dispatch(setUnitName(units[0].related_rental_unit.unit_name));
+      }
+      
+      setLoadingSignIn(false);
+      
       await AsyncStorage.setItem("token", response.data.data.token.token);
       await AsyncStorage.setItem("user_details", JSON.stringify(response.data.data.user_details));
-      await AsyncStorage.setItem("unit_id", String(response.data.data.units[0].related_rental_unit.id))
+      await AsyncStorage.setItem("unit_id", units.length > 0 ? String(units[0].related_rental_unit.id) : ""); // Set unit_id only if units exist
     } catch (err) {
       toast.show("Invalid OTP, Please use the correct OTP", {
         type: "danger",
@@ -185,7 +194,7 @@ const OtpScreen = (props) => {
         offset: 1000,
         animationType: "slide-in",
       });
-      setLoadingSignIn(false)
+      setLoadingSignIn(false);
     }
   };
 
