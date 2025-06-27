@@ -13,6 +13,17 @@ const axiosInstance = axios.create({
   },
 });
 
+// Request interceptor to log the request URL during debug
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     console.log('Request URLss:', config.baseURL + config.url); // Log the full URL
+//     return config;
+//   },
+//   (error) => {
+//     return Promise.reject(error);
+//   }
+// );
+
 // Navigation ref to be set from App.js
 let navigationRef = null;
 

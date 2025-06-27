@@ -8,6 +8,9 @@ import SearchBar from '../../components/SearchBar';
 import PropertyCardTop from '../../components/PropertyCardTop';
 import { AntDesign } from '@expo/vector-icons'; 
 import axiosInstance from '../../api/axiosInstance';
+import CategoryButton from '../../components/CategoryButton';
+
+const categories = ['Near You', 'Apartment', 'Full House', 'Condominium'];
 
 const PropertyDiscoverScreen = ({navigation}) => {
   const insets = useSafeAreaInsets();
@@ -16,11 +19,12 @@ const PropertyDiscoverScreen = ({navigation}) => {
   const [loadingResults, setLoadingResults] = useState(false)
   const [error, setError] = useState(false);
   const token = useSelector((state) => state.auth.token);
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   const useGetHouses = async () => {    
     try {
-        // const response = await axiosInstance.get(`/api/v1/tenants/houses`);
-        setResults([]);
+        const response = await axiosInstance.get(`/tenants/houses`);
+        setResults(response.data.data);
         setLoadingResults(false);
     } catch (e) {
         setError(true);
@@ -34,43 +38,27 @@ const PropertyDiscoverScreen = ({navigation}) => {
 
   return (
     <ScrollView >
-      <SearchBar 
+      <SearchBar
         term={searchTerm}
+        onTermChange={setSearchTerm}
+        onTermSubmit={() => {/* handle search submit here */}}
       />
       <ScrollView>
         {results.length > 0 ? (
         <>
-          <Text style={styles.headerText} h3>Categories</Text>
-          <View style={styles.categoriesView}>
-              <TouchableOpacity
-              >
-                <Card containerStyle={styles.categoriesCard}>
-                  <Text style={styles.serviceCardh5} h5>Near You</Text>
-                </Card>
-              </TouchableOpacity>
-            
-              <TouchableOpacity
-              >
-                <Card containerStyle={styles.categoriesCard}>
-                  <Text style={styles.serviceCardh5} h5>Apartment</Text>
-                </Card>
-              </TouchableOpacity>
-
-              <TouchableOpacity>
-                <Card containerStyle={styles.categoriesCard}>
-                  <Text style={styles.serviceCardh5} h5>Full House</Text>
-                </Card>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-              >
-                <Card containerStyle={styles.categoriesCard}>
-                  <Text style={styles.serviceCardh5} h5>Condominium</Text>
-                </Card>
-              </TouchableOpacity>
+          <Text style={styles.headerText}>Categories</Text>
+          <View style={{ flexDirection: 'row', marginBottom: 16, marginLeft: 12, paddingRight: 12 }}>
+            {categories.map(category => (
+              <CategoryButton
+                key={category}
+                title={category}
+                selected={selectedCategory === category}
+                onPress={() => setSelectedCategory(category)}
+              />
+            ))}
           </View>
           <PropertyCardTop results={results} />
-          <Text h3>Recommended For You</Text>
+          <Text style={styles.recommendedText}>Recommended for you</Text>
           <PropertyCardTop results={results}/>
         </>
           ) : (
@@ -93,10 +81,28 @@ const styles = StyleSheet.create({
   categoriesCard: {
     borderRadius: 30
   },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    marginLeft: 20,
+    marginTop: 24,
+    marginBottom: 12,
+    letterSpacing: 0.2,
+  },
+  recommendedText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#222',
+    marginLeft: 20,
+    marginTop: 28,
+    marginBottom: 12,
+    letterSpacing: 0.1,
+  },
   emptyView: {
     marginTop: 50,
     alignItems: "center"
-}
+  }
 });
 
 export default PropertyDiscoverScreen;
