@@ -2,7 +2,7 @@
   "expo": {
     "name": "RentBeta",
     "slug": "rent-beta",
-    "version": "1.0.20",
+    "version": "1.0.22",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -25,7 +25,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.rentbeta.africa",
-      "versionCode": 25
+      "versionCode": 27
     },
     "web": {
       "favicon": "./assets/favicon.png"

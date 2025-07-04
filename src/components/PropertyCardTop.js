@@ -25,7 +25,7 @@ const PropertyCardTop = ({ results }) => {
         renderItem={({ item }) => {
           return (
             <TouchableOpacity
-              // onPress={() => navigation.navigate('PropertyDetails')}
+              onPress={() => navigation.navigate('PropertyDetails', { result: item })}
             >
               <PropertyDetail result={item} />
             </TouchableOpacity>

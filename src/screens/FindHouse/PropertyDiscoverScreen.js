@@ -47,7 +47,12 @@ const PropertyDiscoverScreen = ({navigation}) => {
         {results.length > 0 ? (
         <>
           <Text style={styles.headerText}>Categories</Text>
-          <View style={{ flexDirection: 'row', marginBottom: 16, marginLeft: 12, paddingRight: 12 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 16, marginLeft: 12, paddingRight: 12 }}
+            contentContainerStyle={{ paddingRight: 24 }}
+          >
             {categories.map(category => (
               <CategoryButton
                 key={category}
@@ -56,7 +61,7 @@ const PropertyDiscoverScreen = ({navigation}) => {
                 onPress={() => setSelectedCategory(category)}
               />
             ))}
-          </View>
+          </ScrollView>
           <PropertyCardTop results={results} />
           <Text style={styles.recommendedText}>Recommended for you</Text>
           <PropertyCardTop results={results}/>
