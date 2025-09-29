@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
-import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert} from 'react-native';
 import { useSelector, useDispatch } from "react-redux";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Button, Card } from 'react-native-elements';
@@ -9,6 +9,7 @@ import PropertyCardTop from '../../components/PropertyCardTop';
 import { AntDesign } from '@expo/vector-icons'; 
 import axiosInstance from '../../api/axiosInstance';
 import CategoryButton from '../../components/CategoryButton';
+import { Linking } from 'react-native';
 
 const categories = ['Near You', 'Apartment', 'Full House', 'Condominium'];
 
@@ -31,6 +32,11 @@ const PropertyDiscoverScreen = ({navigation}) => {
         setLoadingResults(false);
     }
   }
+
+  const filteredResults = results.filter(result =>
+    result.related_rental.location &&
+    result.related_rental.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     useGetHouses()
@@ -62,9 +68,9 @@ const PropertyDiscoverScreen = ({navigation}) => {
               />
             ))}
           </ScrollView>
-          <PropertyCardTop results={results} />
+          <PropertyCardTop results={filteredResults} />
           <Text style={styles.recommendedText}>Recommended for you</Text>
-          <PropertyCardTop results={results}/>
+          <PropertyCardTop results={filteredResults}/>
         </>
           ) : (
           <View style={styles.emptyView}>

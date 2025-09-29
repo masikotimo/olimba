@@ -16,7 +16,7 @@ const axiosInstance = axios.create({
 // Request interceptor to log the request URL during debug
 // axiosInstance.interceptors.request.use(
 //   (config) => {
-//     console.log('Request URLss:', config.baseURL + config.url); // Log the full URL
+//     console.log('Request URLs:', config.baseURL + config.url); // Log the full URL
 //     return config;
 //   },
 //   (error) => {
