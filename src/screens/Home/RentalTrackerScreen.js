@@ -141,7 +141,7 @@ const RentalTrackerScreen = ({navigation}) => {
         {unit_id === null ? (
           <View style={{marginTop: 10, marginLeft: 15, marginRight: 15}}>
             <Text style={{fontSize: 15, fontWeight: 300}}>
-              Welcome To RentBeta, Below is your personal Rental Tracker. You will be able to monitor progress of your rental payments using the Tracker below. Please Proceed to Create a Rent Schedule to start Tracking your Rental Payments
+              Welcome to RentBeta! Below is your personal Rental Tracker where you can monitor your rental payment progress. If your landlord is already on RentBeta, please contact your landlord admin to get connected. If your landlord isn't on our platform yet, help us grow by referring them below!
             </Text>
           </View>
         ) : (
@@ -175,9 +175,10 @@ const RentalTrackerScreen = ({navigation}) => {
                 <Text style={styles.trackerCardh2} h2>0 UGX</Text>
                 <Button
                   buttonStyle={styles.buttonStyle}
-                  title="Create Rent Schedule"
-                  onPress={() => navigation.navigate("RentSchedule")}
+                  title="Refer Your Landlord"
+                  onPress={() => navigation.navigate("ReferLandlord")}
                 />
+                {/* TODO: Create Rent Schedule functionality will be added later */}
             </View>
           </Card>
         ): (

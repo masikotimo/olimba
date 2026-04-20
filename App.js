@@ -25,6 +25,7 @@ import RentalTrackerScreen from "./src/screens/Home/RentalTrackerScreen";
 import RentScheduleScreen from "./src/screens/Home/RentalScheduleScreen";
 import RentalScheduleListScreen from "./src/screens/Home/RentalScheduleListScreen";
 import RentalScheduleDetailsScreen from "./src/screens/Home/RentalScheduleDetailsScreen";
+import ReferLandlordScreen from "./src/screens/Home/ReferLandlordScreen";
 import LandlordDetailsScreen from "./src/screens/Account/LandlordDetailsScreen";
 
 import PropertyDiscoverScreen from "./src/screens/FindHouse/PropertyDiscoverScreen";
@@ -67,6 +68,7 @@ const HomeScreens = () => {
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="RentSchedule" component={RentScheduleScreen} options={{ title: 'Create Rent Schedule' }}/>
         <Stack.Screen name="RentalCalender" component={RentalCalenderScreen} options={{ title: 'Create Rent Schedule' }}/>
+        <Stack.Screen name="ReferLandlord" component={ReferLandlordScreen} options={{ title: 'Refer Your Landlord' }}/>
         <Stack.Screen name="PropertyDiscover" component={PropertyDiscoverScreen} options={{ title: "Find a House" }}/>
         <Stack.Screen name="PropertyDetails" component={PropertyDetailsScreen} />
         <Stack.Screen name="PropertySearch" component={PropertySearchScreen} />

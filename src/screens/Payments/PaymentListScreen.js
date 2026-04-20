@@ -60,7 +60,7 @@ const PaymentListScreen = ({navigation}) => {
                                     data={rentalPayments}
                                     keyExtractor={(payment) => payment.id}
                                     renderItem={({item}) => {
-                                        return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={dateFormatter(item.date_created)} onPress={() => navigatePaymentDetails(item)}/>
+                                        return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={dateFormatter(item.date_paid)} onPress={() => navigatePaymentDetails(item)}/>
                                     }}
                                 />
                             ) : (

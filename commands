@@ -1,3 +1,13 @@
 deployment
 eas build --platform android --profile preview
+npx expo start -c
 make sure you have received the credentials from the developer ie key alias , key password and the  keystore file and the keystore password
+
+
+xcrun simctl list devices available
+
+xcrun simctl shutdown all
+xcrun simctl shutdown 92D43D85-5A4D-48C8-A693-A5653862D219
+
+
+xcrun simctl boot 92D43D85-5A4D-48C8-A693-A5653862D219
