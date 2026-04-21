@@ -4,7 +4,7 @@ import { Text, Button, Card, Skeleton } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import moment from "moment";
 import { AntDesign } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons,MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from "react-redux";
 import SelectDropdown from 'react-native-select-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -141,7 +141,7 @@ const RentalTrackerScreen = ({navigation}) => {
         {unit_id === null ? (
           <View style={{marginTop: 10, marginLeft: 15, marginRight: 15}}>
             <Text style={{fontSize: 15, fontWeight: 300}}>
-              Welcome to RentBeta! Below is your personal Rental Tracker where you can monitor your rental payment progress. If your landlord is already on RentBeta, please contact your landlord admin to get connected. If your landlord isn't on our platform yet, help us grow by referring them below!
+              Welcome to RentBeta! Below is your personal Rental Tracker where you can monitor your rental payment progress. If your landlord is already on RentBeta, please contact your landlord admin to get connected.
             </Text>
           </View>
         ) : (
@@ -175,8 +175,8 @@ const RentalTrackerScreen = ({navigation}) => {
                 <Text style={styles.trackerCardh2} h2>0 UGX</Text>
                 <Button
                   buttonStyle={styles.buttonStyle}
-                  title="Refer Your Landlord"
-                  onPress={() => navigation.navigate("ReferLandlord")}
+                  title="Self Onboard"
+                  onPress={() => navigation.navigate("RentSchedule")}
                 />
                 {/* TODO: Create Rent Schedule functionality will be added later */}
             </View>
@@ -221,10 +221,11 @@ const RentalTrackerScreen = ({navigation}) => {
         <View style={styles.servicesView}>
           <Card containerStyle={styles.servicesCard}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('LoanCreditScore')}
+              onPress={() => navigation.navigate('ReferLandlord')}
             >
-              <AntDesign name="wallet" size={30} color="#FCB200" style={styles.cardIcon}/>
-              <Text style={styles.serviceCardh5} h5>Rental TopUp</Text>
+              <Ionicons name="person-add-outline" size={30} color="#FCB200" style={styles.cardIcon}/>
+         
+              <Text style={styles.serviceCardh5} h5>Refer </Text>
             </TouchableOpacity>
           </Card>
           {/* <Card containerStyle={styles.servicesCard}>
@@ -236,16 +237,18 @@ const RentalTrackerScreen = ({navigation}) => {
             </TouchableOpacity>
           </Card> */}
           <Card containerStyle={styles.servicesCard}>
-            <TouchableOpacity>
-              <AntDesign name="bulb1" size={30} color="#FCB200" style={styles.cardIcon}/>
-              <Text style={styles.serviceCardh5} h5>Pay Utilities</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('LoanCreditScore')}
+            >
+              <AntDesign name="wallet" size={30} color="#FCB200" style={styles.cardIcon}/>
+              <Text style={styles.serviceCardh5} h5>Rental TopUp</Text>
             </TouchableOpacity>
           </Card>
           <Card containerStyle={styles.servicesCard}>
             <TouchableOpacity
               onPress={() => navigation.navigate('PropertyDiscover')}
             >
-              <Ionicons name="home-outline" size={30} color="#FCB200" style={styles.cardIcon}/>
+              <MaterialIcons name="find-in-page" size={30} color="#FCB200" style={styles.cardIcon}/>
               <Text style={styles.serviceCardh5} h5>Find a House</Text>
             </TouchableOpacity>
           </Card>

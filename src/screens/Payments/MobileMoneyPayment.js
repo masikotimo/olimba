@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Text, Button } from 'react-native-elements';
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from '../../api/axiosInstance';
-import PhoneInput from 'react-native-international-phone-number';
+import PhoneInput, { getCountryByCca2 } from 'react-native-international-phone-number';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { setPaymentId } from '../../store/authslice';
@@ -15,32 +15,52 @@ const MobileMoneyPayment = () => {
     const [errorMessage, setErrorMessage] = useState("")
     const [amount, setAmount] = useState('');
     const user = useSelector((state) => state.auth.user);
-    const token = useSelector((state) => state.auth.token);
     const unit_id = useSelector((state) => state.auth.unit_id);
-    const [fees, setFees] = useState("")
-    const [total, setTotal] = useState({"total":0, "fee":0})
+    const [quote, setQuote] = useState({
+        base_amount: 0,
+        charge_amount: 0,
+        total_amount: 0,
+        charge_applies: false,
+        charge_name: null,
+    });
     const [word, setWord] = useState("Pay Rent")
-    const [loadingFees, setLoadingFees] = useState(true)
     const [loadingPaymentCall, setLoadingPaymentCall] = useState(false)
-    const [selectedCountry, setSelectedCountry] = useState(null);
-    const [inputValue, setInputValue] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState(() => getCountryByCca2('UG') ?? null);
+    const [inputValue, setInputValue] = useState(() => {
+        const phone = String(user?.phone_number ?? '');
+        if (!phone) return '';
+        if (phone.startsWith('+256')) return phone.slice(4);
+        if (phone.startsWith('256')) return phone.slice(3);
+        return phone.startsWith('0') ? phone.slice(1) : phone;
+    });
 
-    const fetchPaymentSettings = async () => {
-        try {
-            const response = await axiosInstance.get('/tenants/payments/settings');
-            setFees(response.data.data);
-            setLoadingFees(false);
-        } catch (e) {
-            setLoadingFees(false);
-        }
+    const getCountryCodePrefix = (country) => {
+        const root = country?.idd?.root ?? '';
+        const suffix = country?.idd?.suffixes?.[0] ?? '';
+        const legacyCallingCode = country?.callingCode ?? '';
+        return `${root}${suffix}` || legacyCallingCode;
     };
 
-    useEffect(() => {
-        fetchPaymentSettings()
-    }, [])
-    
+    const normalizeLocalPhone = (phone) => {
+        const compactPhone = (phone ?? '').replaceAll(' ', '');
+        return compactPhone.startsWith('0') ? compactPhone.slice(1) : compactPhone;
+    };
 
-    const defaultValue = "+256"+user.phone_number
+    const buildInternationalPhone = (country, phone) => {
+        const localPhone = normalizeLocalPhone(phone);
+        return `${getCountryCodePrefix(country)}${localPhone}`.replaceAll(' ', '');
+    };
+
+    const resetQuote = () => {
+        setQuote({
+            base_amount: 0,
+            charge_amount: 0,
+            total_amount: 0,
+            charge_applies: false,
+            charge_name: null,
+        });
+    };
+    
     function handleInputValue(phoneNumber) {
         setInputValue(phoneNumber);
     }
@@ -49,28 +69,61 @@ const MobileMoneyPayment = () => {
         setSelectedCountry(country);
     }
 
-    const handleChangeAmount = (amount) => {
-        setAmount(amount)
-        setTotal({"total":amount, "fee": amount*(fees.fee/100)})
+    const handleChangeAmount = (value) => {
+        setAmount(value)
+        setErrorMessage("")
     }
+
+    useEffect(() => {
+        const cleanAmount = amount.replace(/,/g, '').trim();
+        if (!cleanAmount || Number.isNaN(Number(cleanAmount))) {
+            resetQuote();
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                const response = await axiosInstance.get('/tenants/payments/charge-quote', {
+                    params: {
+                        related_rental_unit: unit_id,
+                        amount: cleanAmount,
+                    },
+                });
+                setQuote(response.data?.data ?? {});
+            } catch (e) {
+                resetQuote();
+                if (e?.response?.data?.message) {
+                    setErrorMessage(e.response.data.message);
+                }
+            }
+        }, 350);
+
+        return () => clearTimeout(timer);
+    }, [amount, unit_id]);
 
     const makePayment = async ({ amount }) => {
         try {
             setLoadingPaymentCall(true)
-            const unPhone = selectedCountry.callingCode+inputValue
-            const phoneNumber = unPhone.replaceAll(" ", "")
+            const phoneNumber = buildInternationalPhone(selectedCountry, inputValue)
+            const cleanAmount = amount.replace(/,/g, '').trim();
+            console.log("payload", { 
+                "related_rental_unit": unit_id, 
+                "related_tenant": user.id, 
+                "phone_number": phoneNumber, 
+                "amount": cleanAmount 
+            })
             const response = await axiosInstance.post('/tenants/payments', { 
                 "related_rental_unit": unit_id, 
                 "related_tenant": user.id, 
                 "phone_number": phoneNumber, 
-                "amount": amount 
+                "amount": cleanAmount 
             });
             if(response.data.status === 200) {
                 dispatch(setPaymentId(response.data.data.id))
                 setTimeout(() => {
                     setLoadingPaymentCall(false)
                     setAmount("")
-                    setTotal({"total":0, "fee":0})
+                    resetQuote()
                     navigation.navigate("PaymentWaiting");
                 }, 2000);
             }
@@ -87,7 +140,7 @@ const MobileMoneyPayment = () => {
                 <View style={styles.container}>
                     <PhoneInput
                         value={inputValue}
-                        defaultValue={defaultValue}
+                        defaultCountry="UG"
                         onChangePhoneNumber={handleInputValue}
                         selectedCountry={selectedCountry}
                         onChangeSelectedCountry={handleSelectedCountry}
@@ -102,7 +155,11 @@ const MobileMoneyPayment = () => {
                     />
 
                     <View style={{alignItems: "center", marginTop: 15}}>
-                        <Text style={styles.disclaimer}>A transaction fee of {total.fee} will be added on top of the amount entered above</Text>
+                        <Text style={styles.disclaimer}>
+                            {quote.charge_applies
+                                ? `A charge of ${quote.charge_amount} (${quote.charge_name}) applies. Total: ${quote.total_amount}`
+                                : `No extra charge applies. Total: ${quote.total_amount || 0}`}
+                        </Text>
                     </View>
                     {errorMessage ? (
                         <Text style={styles.errorMessage}>{errorMessage}</Text>

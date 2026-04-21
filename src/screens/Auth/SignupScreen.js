@@ -4,7 +4,7 @@ import { Text, Button, Input } from 'react-native-elements';
 import NavLink from '../../components/NavLink';
 import { useDispatch, useSelector } from "react-redux";
 import { setUserSignUp } from '../../store/authslice';
-import PhoneInput from 'react-native-international-phone-number';
+import PhoneInput, { getCountryByCca2 } from 'react-native-international-phone-number';
 import backendApi from "../../api/backend";
 import { StatusBar } from 'expo-status-bar';
 
@@ -20,7 +20,7 @@ const SignupScreen = ({ navigation }) => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [loadingSignIn, setLoadingSignIn] = useState(false)
 
-  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(() => getCountryByCca2('UG') ?? null);
   const [inputValue, setInputValue] = useState('');
 
   function handleInputValue(phoneNumber) {
@@ -30,6 +30,23 @@ const SignupScreen = ({ navigation }) => {
   function handleSelectedCountry(country) {
     setSelectedCountry(country);
   }
+
+  const getCountryCodePrefix = (country) => {
+    const root = country?.idd?.root ?? '';
+    const suffix = country?.idd?.suffixes?.[0] ?? '';
+    const legacyCallingCode = country?.callingCode ?? '';
+    return `${root}${suffix}` || legacyCallingCode;
+  };
+
+  const normalizeLocalPhone = (phone) => {
+    const compactPhone = (phone ?? '').replaceAll(' ', '');
+    return compactPhone.startsWith('0') ? compactPhone.slice(1) : compactPhone;
+  };
+
+  const buildInternationalPhone = (country, phone) => {
+    const localPhone = normalizeLocalPhone(phone);
+    return `${getCountryCodePrefix(country)}${localPhone}`.replaceAll(' ', '');
+  };
 
   useEffect(() => { 
 
@@ -74,9 +91,8 @@ const SignupScreen = ({ navigation }) => {
 
   const signup = async ({ email, password, firstname, lastname }) => {
     setLoadingSignIn(true)
-    const username = selectedCountry.callingCode+inputValue
-    const unUsername = username.replaceAll(" ", "")
-    phoneNumber = inputValue.replaceAll(" ", "")
+    const unUsername = buildInternationalPhone(selectedCountry, inputValue)
+    const phoneNumber = normalizeLocalPhone(inputValue)
     if (isFormValid) { 
       try {
         const response = await backendApi.post("/accounts/users", { "email":email, "password":password, "first_name": firstname, "last_name":lastname, "phone_number":phoneNumber, "username": unUsername });

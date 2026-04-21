@@ -1,5 +1,6 @@
 deployment
 eas build --platform android --profile preview
+eas submit --platform ios  
 npx expo start -c
 make sure you have received the credentials from the developer ie key alias , key password and the  keystore file and the keystore password
 

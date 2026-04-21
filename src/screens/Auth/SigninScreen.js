@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, TextInput, ActivityIndicator } from 'react-native';
 import { Text, Button } from 'react-native-elements';
-import PhoneInput from 'react-native-international-phone-number';
+import PhoneInput, { getCountryByCca2 } from 'react-native-international-phone-number';
 import { setPhoneNumber, setUserSignUp } from '../../store/authslice';
 import { useDispatch } from "react-redux";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -15,7 +15,7 @@ const SigninScreen = ({navigation}) => {
   const [loadingSignIn, setLoadingSignIn] = useState(false);
   const [loadingSignUp, setLoadingSignUp] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(() => getCountryByCca2('UG') ?? null);
   const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch();
 
@@ -28,6 +28,23 @@ const SigninScreen = ({navigation}) => {
     setSelectedCountry(country);
   }
 
+  const getCountryCodePrefix = (country) => {
+    const root = country?.idd?.root ?? '';
+    const suffix = country?.idd?.suffixes?.[0] ?? '';
+    const legacyCallingCode = country?.callingCode ?? '';
+    return `${root}${suffix}` || legacyCallingCode;
+  };
+
+  const normalizeLocalPhone = (phone) => {
+    const compactPhone = (phone ?? '').replaceAll(' ', '');
+    return compactPhone.startsWith('0') ? compactPhone.slice(1) : compactPhone;
+  };
+
+  const buildInternationalPhone = (country, phone) => {
+    const localPhone = normalizeLocalPhone(phone);
+    return `${getCountryCodePrefix(country)}${localPhone}`.replaceAll(' ', '');
+  };
+
   useEffect(() => {
     setLoadingSignIn(false)
     validateForm(); 
@@ -36,12 +53,14 @@ const SigninScreen = ({navigation}) => {
   const fetchUserDetails = async (phone) => {
     try {
         setLoadingUserDetails(true)
-        const phoneNumber = selectedCountry.callingCode+phone
-        const unSpacedNumber = phoneNumber.replaceAll(" ", "")
-
+        const unSpacedNumber = buildInternationalPhone(selectedCountry, phone)
+        console.log("payload", { 
+            "phone_number": unSpacedNumber
+        })
         const response = await axiosInstance.post(`/accounts/users/details`, { 
             "phone_number": unSpacedNumber
         });
+        
 
         if(response.data.status === 206){
             setLoadingUserDetails(false)
@@ -65,7 +84,8 @@ const SigninScreen = ({navigation}) => {
 
   const handleInputValue = async (phoneNumber) =>  {
     setInputValue(phoneNumber);
-    if(phoneNumber.length === 11){
+    const normalizedPhone = normalizeLocalPhone(phoneNumber);
+    if(normalizedPhone.length === 9){
         await fetchUserDetails(phoneNumber);
         setDetailsVerified(true)
     }else{
@@ -96,11 +116,16 @@ const SigninScreen = ({navigation}) => {
 
   const signup = async ({ firstname, lastname }) => {
     setLoadingSignUp(true)
-    const username = selectedCountry.callingCode+inputValue
-    const unUsername = username.replaceAll(" ", "")
-    const phoneNumber = inputValue.replaceAll(" ", "")
+    const unUsername = buildInternationalPhone(selectedCountry, inputValue)
+    const phoneNumber = normalizeLocalPhone(inputValue)
     if (isFormValid) { 
       try {
+        console.log("payload", { 
+          "first_name": firstname, 
+          "last_name":lastname, 
+          "phone_number":phoneNumber, 
+          "username": unUsername 
+        })
         const response = await axiosInstance.post(`/accounts/tenants/create`, {"first_name": firstname, "last_name":lastname, "phone_number":phoneNumber, "username": unUsername });
         dispatch(setUserSignUp(response.data.data))
         navigation.navigate("Otp");
@@ -113,8 +138,7 @@ const SigninScreen = ({navigation}) => {
   const signin = async ({ selectedCountry, inputValue }) => {
     try {
         setLoadingSignIn(true);
-        const phoneNumber = selectedCountry.callingCode+inputValue;
-        const unSpacedNumber = phoneNumber.replaceAll(" ", "");
+        const unSpacedNumber = buildInternationalPhone(selectedCountry, inputValue);
         const response = await axiosInstance.post(`/accounts/authenticate/tenant`, { 
             "phone_number": unSpacedNumber 
         });
