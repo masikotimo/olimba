@@ -156,9 +156,7 @@ const MobileMoneyPayment = () => {
 
                     <View style={{alignItems: "center", marginTop: 15}}>
                         <Text style={styles.disclaimer}>
-                            {quote.charge_applies
-                                ? `A charge of ${quote.charge_amount} (${quote.charge_name}) applies. Total: ${quote.total_amount}`
-                                : `No extra charge applies. Total: ${quote.total_amount || 0}`}
+                            {`A transaction fee of (${quote.charge_amount || 0}) UGX will be added to this transaction`}
                         </Text>
                     </View>
                     {errorMessage ? (

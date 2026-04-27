@@ -2,7 +2,7 @@ export default {
   expo: {
     name: "RentBeta",
     slug: "rent-beta",
-    version: "1.0.24",
+    version: "1.0.27",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -54,7 +54,8 @@ export default {
     plugins: [
       "expo-asset",
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-sharing"
     ]
   }
 };

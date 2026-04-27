@@ -21,7 +21,7 @@ const PropertyCardTop = ({ results }) => {
         horizontal
         showsHorizontalScrollIndicator={false}
         data={results}
-        keyExtractor={result => result.id}
+        keyExtractor={result => String(result.id)}
         renderItem={({ item }) => {
           return (
             <TouchableOpacity

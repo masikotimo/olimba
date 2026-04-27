@@ -58,7 +58,7 @@ const PaymentListScreen = ({navigation}) => {
                             {rentalPayments.length > 0 ? (
                                 <FlatList
                                     data={rentalPayments}
-                                    keyExtractor={(payment) => payment.id}
+                                    keyExtractor={(payment) => String(payment.id)}
                                     renderItem={({item}) => {
                                         return <TransactionsCard cardTitle={item.related_rental_unit.unit_name} cardAmount={item.amount} cardDate={dateFormatter(item.date_paid)} onPress={() => navigatePaymentDetails(item)}/>
                                     }}

@@ -19,7 +19,8 @@ const ReferLandlordScreen = ({ navigation }) => {
     landlord_phone: '',
     landlord_email: '',
     property_location: '',
-    rent_amount: ''
+    rent_amount: '',
+    number_of_units: ''
   });
 
   const handleInputChange = (field, value) => {
@@ -30,7 +31,7 @@ const ReferLandlordScreen = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    const requiredFields = ['landlord_name', 'landlord_phone', 'landlord_email', 'property_location', 'rent_amount'];
+    const requiredFields = ['landlord_name', 'landlord_phone', 'landlord_email', 'property_location', 'rent_amount', 'number_of_units'];
     const missingFields = requiredFields.filter(field => !formData[field].trim());
     
     if (missingFields.length > 0) {
@@ -48,6 +49,12 @@ const ReferLandlordScreen = ({ navigation }) => {
     // Basic phone validation (should start with +)
     if (!formData.landlord_phone.startsWith('+')) {
       Alert.alert('Invalid Phone', 'Phone number should start with +');
+      return false;
+    }
+
+    const units = Number(formData.number_of_units);
+    if (!Number.isInteger(units) || units <= 0) {
+      Alert.alert('Invalid Units', 'Number of units must be a whole number greater than 0');
       return false;
     }
 
@@ -174,6 +181,17 @@ const ReferLandlordScreen = ({ navigation }) => {
             inputStyle={styles.inputStyle}
             labelStyle={styles.labelStyle}
             placeholder="e.g., 500000"
+            keyboardType="numeric"
+          />
+
+          <Input
+            label="Number of Units *"
+            value={formData.number_of_units}
+            onChangeText={(value) => handleInputChange('number_of_units', value)}
+            containerStyle={styles.inputContainer}
+            inputStyle={styles.inputStyle}
+            labelStyle={styles.labelStyle}
+            placeholder="e.g., 12"
             keyboardType="numeric"
           />
         </Card>

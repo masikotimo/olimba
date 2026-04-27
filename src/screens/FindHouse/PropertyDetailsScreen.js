@@ -1,28 +1,55 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Linking, ScrollView, Alert } from 'react-native';
-import { Feather, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Linking, ScrollView, FlatList, Dimensions } from 'react-native';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 
 const PropertyDetailsScreen = ({ route }) => {
   const { result } = route.params;
+  const screenWidth = Dimensions.get('window').width;
 
+  const normalizeImageUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http://') ? url.replace('http://', 'https://') : url;
+  };
 
-  // Get image (first image or fallback)
-  const hasImage = result.images && result.images.length > 0 && result.images[0].image;
-  const imageUri = hasImage
-    ? result.images[0].image
-    : 'https://images.unsplash.com/photo-1586105251261-c1tdtQVXda0?auto=format&fit=crop&w=400&q=80';
+  const gallery = Array.isArray(result.images)
+    ? result.images
+        .map((img) => normalizeImageUrl(img?.image))
+        .filter(Boolean)
+    : [];
+
+  const fallbackImage = 'https://images.unsplash.com/photo-1586105251261-c1tdtQVXda0?auto=format&fit=crop&w=400&q=80';
+  const imageUris = gallery.length > 0 ? gallery : [fallbackImage];
+  const [activeImage, setActiveImage] = useState(0);
 
   // Open Google Maps
   const openLocation = () => {
-    if (result.location_url) {
-        Linking.openURL(result.location_url);
-        Alert.alert("Property Location",result.location_url);
+    const locationUrl = result?.related_rental?.location_url;
+    if (locationUrl) {
+        Linking.openURL(locationUrl);
     }
   };
 
   return (
     <ScrollView style={{ backgroundColor: '#F5F6FA' }}>
-      <Image source={{ uri: imageUri }} style={styles.image} />
+      <FlatList
+        data={imageUris}
+        keyExtractor={(item, index) => `${item}-${index}`}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(event) => {
+          const nextIndex = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
+          setActiveImage(nextIndex);
+        }}
+        renderItem={({ item }) => <Image source={{ uri: item }} style={[styles.image, { width: screenWidth }]} />}
+      />
+      {imageUris.length > 1 ? (
+        <View style={styles.paginationRow}>
+          {imageUris.map((_, index) => (
+            <View key={index} style={[styles.paginationDot, index === activeImage ? styles.paginationDotActive : null]} />
+          ))}
+        </View>
+      ) : null}
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.name}>{result.related_rental.rental_name}</Text>
@@ -60,10 +87,24 @@ const PropertyDetailsScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   image: {
-    width: '100%',
     height: 220,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
+  },
+  paginationRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 8,
+    gap: 6,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#d0d0d0',
+  },
+  paginationDotActive: {
+    backgroundColor: '#FFC107',
   },
   card: {
     backgroundColor: '#fff',

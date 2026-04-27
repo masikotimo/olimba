@@ -2,10 +2,15 @@ import React from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 
 const PropertyDetail = ({result}) => {
+    const normalizeImageUrl = (url) => {
+        if (!url) return '';
+        return url.startsWith('http://') ? url.replace('http://', 'https://') : url;
+    };
+
     // Check if there is at least one image
     const hasImage = result.images && result.images.length > 0 && result.images[0].image;
     const imageUri = hasImage
-        ? result.images[0].image
+        ? normalizeImageUrl(result.images[0].image)
         : 'https://images.unsplash.com/photo-1586105251261-c1tdtQVXda0?auto=format&fit=crop&w=400&q=80'; // Unsplash static house image
 
     return (

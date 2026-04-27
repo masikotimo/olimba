@@ -6,8 +6,6 @@ import moment from "moment";
 import { AntDesign } from '@expo/vector-icons';
 import { Ionicons,MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from "react-redux";
-import SelectDropdown from 'react-native-select-dropdown';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { setUnitId, setUnitName } from '../../store/authslice';
 import NetworkStatus from '../../components/NetworkStatus';
 import { StatusBar } from 'expo-status-bar';
@@ -24,19 +22,45 @@ const RentalTrackerScreen = ({navigation}) => {
   const [colour, setColor] = useState("")
   const [rentals, setRentals] = useState([])
   const [isLoadingRentals, setLoadingRentals] = useState(true);
+  const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
 	const [error, setError] = useState(false);
   const unit_id = useSelector((state) => state.auth.unit_id);
   const unit_name = useSelector((state) => state.auth.unit_name);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
+  const unitOptions = rentals
+    .map((item) => {
+      const unit = item?.related_rental_unit;
+      if (!unit?.id || !unit?.unit_name) return null;
+      return {
+        id: unit.id,
+        unit_name: unit.unit_name,
+      };
+    })
+    .filter(Boolean);
+  const hasUnitOptions = unitOptions.length > 0;
+  const selectedUnit = unitOptions.find((unit) => String(unit.id) === String(unit_id));
+  const hasSelectedUnitInOptions = Boolean(selectedUnit);
+  const hasActiveTenancy = hasUnitOptions && hasSelectedUnitInOptions;
+  const selectedUnitLabel =
+    selectedUnit?.unit_name ||
+    unit_name ||
+    unitOptions[0]?.unit_name ||
+    "Select Unit";
 
 
   const useGetOccupancyDetails = async () => {    
+    if (!hasUnitOptions || !hasSelectedUnitInOptions || !user?.id) {
+      setOccupancyDetails({});
+      setLoadingOccupancyDetails(false);
+      return;
+    }
+
     try {
       setLoadingOccupancyDetails(true)
       const response = await axiosInstance.post(`/tenants/occupancy`, {
         "tenant_id": user.id, 
-        "unit_id": unit_id
+        "unit_id": selectedUnit.id
       });
       setOccupancyDetails(response.data.data);
       if(response.data.data.rate === 0){
@@ -79,7 +103,29 @@ const RentalTrackerScreen = ({navigation}) => {
     })
 
     return unsubscribe
-  }, [navigation, unit_id, refreshing])
+  }, [navigation, unit_id, refreshing, hasUnitOptions])
+
+  useEffect(() => {
+    if (unitOptions.length > 0 && !hasSelectedUnitInOptions) {
+      const firstUnit = unitOptions[0];
+      if (firstUnit?.id) {
+        dispatch(setUnitId(firstUnit.id));
+        dispatch(setUnitName(firstUnit.unit_name));
+      }
+      return;
+    }
+
+    if (unitOptions.length === 0 && unit_id) {
+      dispatch(setUnitId(null));
+      dispatch(setUnitName(""));
+    }
+  }, [unitOptions, hasSelectedUnitInOptions, unit_id, dispatch]);
+
+  useEffect(() => {
+    if (!hasUnitOptions) {
+      setIsUnitMenuOpen(false);
+    }
+  }, [hasUnitOptions]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -107,38 +153,61 @@ const RentalTrackerScreen = ({navigation}) => {
         <NetworkStatus />
         <View style={styles.welcomeHeader}>
           {user ? (
-            <Text style={styles.headerText} h3>Hello, {user.first_name}</Text>
-          ) : (
-            null
-          )}
-          {unit_id === null ? (<></>) : (
-            <SelectDropdown
-              data={rentals}
-              onSelect={(selectedItem, index) => {
-                dispatch(setUnitId(selectedItem.related_rental_unit.id))
-                dispatch(setUnitName(selectedItem.related_rental_unit.unit_name))
-              }}
-              defaultButtonText={'Units'}
-              buttonTextAfterSelection={(selectedItem, index) => {
-                return selectedItem.related_rental_unit.unit_name;
-              }}
-              rowTextForSelection={(item, index) => {
-                return item.related_rental_unit.unit_name;
-              }}
-              buttonStyle={styles.dropdown2BtnStyle}
-              buttonTextStyle={styles.dropdown2BtnTxtStyle}
-              renderDropdownIcon={isOpened => {
-                return <FontAwesome name={isOpened ? 'chevron-up' : 'chevron-down'} color={'#FFF'} size={18} />;
-              }}
-              dropdownIconPosition={'right'}
-              dropdownStyle={styles.dropdown2DropdownStyle}
-              rowStyle={styles.dropdown2RowStyle}
-              rowTextStyle={styles.dropdown2RowTxtStyle}
-            />
-          )}
+            <Text style={styles.headerText} numberOfLines={1} h3>Hello, {user.first_name}</Text>
+          ) : null}
+          {hasUnitOptions ? (
+            <View style={styles.unitSelectorInline}>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                style={styles.unitSelectorButton}
+                onPress={() => setIsUnitMenuOpen((prev) => !prev)}
+              >
+                <Text style={styles.unitSelectorButtonText} numberOfLines={1}>
+                  {selectedUnitLabel}
+                </Text>
+                <Ionicons
+                  name={isUnitMenuOpen ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  color="#444"
+                />
+              </TouchableOpacity>
+              {isUnitMenuOpen ? (
+                <View style={styles.unitSelectorMenu}>
+                  {unitOptions.map((item) => {
+                    const isSelected = String(item.id) === String(unit_id);
+                    return (
+                      <TouchableOpacity
+                        key={`${item.id}`}
+                        activeOpacity={0.85}
+                        style={[
+                          styles.unitSelectorMenuItem,
+                          isSelected && styles.unitSelectorMenuItemSelected,
+                        ]}
+                        onPress={() => {
+                          dispatch(setUnitId(item.id));
+                          dispatch(setUnitName(item.unit_name));
+                          setIsUnitMenuOpen(false);
+                        }}
+                      >
+                        <Text
+                          style={[
+                            styles.unitSelectorMenuItemText,
+                            isSelected && styles.unitSelectorMenuItemTextSelected,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {item.unit_name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              ) : null}
+            </View>
+          ) : null}
         </View>
         
-        {unit_id === null ? (
+        {!hasActiveTenancy ? (
           <View style={{marginTop: 10, marginLeft: 15, marginRight: 15}}>
             <Text style={{fontSize: 15, fontWeight: 300}}>
               Welcome to RentBeta! Below is your personal Rental Tracker where you can monitor your rental payment progress. If your landlord is already on RentBeta, please contact your landlord admin to get connected.
@@ -167,7 +236,7 @@ const RentalTrackerScreen = ({navigation}) => {
           }}
         /> */}
 
-        {unit_id === null ? (
+        {!hasActiveTenancy ? (
           <Card containerStyle={styles.trackerCard} sx={{backgroundColor: "#82ed9f"}}>
             <View >
                 <Text style={styles.trackerCardh5} h4>Your Personal Rental Tracker</Text>
@@ -206,7 +275,7 @@ const RentalTrackerScreen = ({navigation}) => {
           </>
         )}
 
-        {unit_id === null ? (
+        {!hasActiveTenancy ? (
           <></>
         ) : (
           <>
@@ -269,14 +338,24 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontWeight: 700,
-    flex: 3
+    flex: 1,
+    minWidth: 0,
+    marginRight: 10
   },
   welcomeHeader: {
     marginTop: 20,
     marginLeft: 15,
-    display: "flex",
+    marginRight: 15,
     flexDirection: "row",
-    justifyContent: "space-around"
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  unitSelectorInline: {
+    position: "relative",
+    flexShrink: 0,
+    maxWidth: "46%",
+    zIndex: 20,
+    elevation: 6,
   },
   trackerCard: {
     borderRadius: 25,
@@ -326,29 +405,55 @@ const styles = StyleSheet.create({
   cardIcon: {
     alignSelf: "center"
   },
-  dropdown2BtnStyle: {
-    backgroundColor: '#444',
-    borderRadius: 8,
-    marginLeft: 15,
-    width: "30%",
+  unitSelectorButton: {
+    height: 40,
+    minWidth: 96,
+    maxWidth: 200,
+    alignSelf: "flex-end",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#FCB200",
+    backgroundColor: "#FFF7D6",
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  unitSelectorButtonText: {
     flex: 1,
-    alignContent: "center"
+    minWidth: 0,
+    marginRight: 6,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#444",
   },
-  dropdown2BtnTxtStyle: {
-    color: '#FFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
+  unitSelectorMenu: {
+    position: "absolute",
+    right: 0,
+    top: 46,
+    minWidth: 200,
+    maxWidth: 280,
+    borderWidth: 1,
+    borderColor: "#F0D88C",
+    borderRadius: 10,
+    backgroundColor: "#FFF",
+    overflow: "hidden",
   },
-  dropdown2DropdownStyle: {
-    backgroundColor: '#444',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+  unitSelectorMenuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5EACC",
   },
-  dropdown2RowStyle: {backgroundColor: '#444', borderBottomColor: '#C5C5C5'},
-  dropdown2RowTxtStyle: {
-    color: '#FFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
+  unitSelectorMenuItemSelected: {
+    backgroundColor: "#FFF7D6",
+  },
+  unitSelectorMenuItemText: {
+    color: "#444",
+    fontWeight: "500",
+  },
+  unitSelectorMenuItemTextSelected: {
+    color: "#A56A00",
+    fontWeight: "700",
   },
 
 });

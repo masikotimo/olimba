@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Text, StyleSheet, ScrollView, TextInput, View, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, ScrollView, TextInput, View, TouchableOpacity, Alert } from "react-native";
 import { Button } from "react-native-elements";
 import { useSelector, useDispatch } from "react-redux";
 import { setUnitId, setUnitName } from "../../store/authslice";
@@ -9,6 +9,18 @@ import DatePickerComponent from "../../components/DatePicker";
 const RentScheduleScreen = ({ navigation }) => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
+  const signedUpPhone = String(user?.username ?? "").replaceAll(" ", "").trim();
+  const defaultWhatsappPhone = signedUpPhone
+    ? signedUpPhone.startsWith("+")
+      ? signedUpPhone
+      : signedUpPhone.startsWith("0")
+      ? `+256${signedUpPhone.slice(1)}`
+      : signedUpPhone.startsWith("256")
+      ? `+${signedUpPhone}`
+      : /^\d{9}$/.test(signedUpPhone)
+      ? `+256${signedUpPhone}`
+      : signedUpPhone
+    : "+256";
 
   const [loadingScheduleCall, setLoadingScheduleCall] = useState(false);
   const [open, setOpen] = useState(false);
@@ -17,7 +29,7 @@ const RentScheduleScreen = ({ navigation }) => {
   const [successMessage, setSuccessMessage] = useState("");
 
   const [form, setForm] = useState({
-    whatsapp_phone: user?.phone_number ? `+256${String(user.phone_number).replace(/^0/, "")}` : "+256",
+    whatsapp_phone: defaultWhatsappPhone,
     tenant_first_name: user?.first_name ?? "",
     tenant_last_name: user?.last_name ?? "",
     monthly_rent: "",
@@ -77,6 +89,12 @@ const RentScheduleScreen = ({ navigation }) => {
     return clean || "0";
   };
 
+  const normalizeName = (value) =>
+    String(value ?? "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
   const onInputChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -119,16 +137,42 @@ const RentScheduleScreen = ({ navigation }) => {
     return "";
   };
 
+  const processOnboardingSubmission = async (payload) => {
+    setLoadingScheduleCall(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const response = await axiosInstance.post("/tenants/onboard", payload);
+      const responseData = response?.data?.data ?? response?.data ?? {};
+      if (responseData?.unit_id) {
+        dispatch(setUnitId(responseData.unit_id));
+      }
+      if (responseData?.unit_name) {
+        dispatch(setUnitName(responseData.unit_name));
+      } else if (payload.unit_name) {
+        dispatch(setUnitName(payload.unit_name));
+      }
+      setSuccessMessage("Onboarding saved successfully.");
+      const parentNavigator = navigation.getParent();
+      if (parentNavigator) {
+        parentNavigator.navigate("HomeScreen", { screen: "RentalTracker" });
+      } else {
+        navigation.navigate("RentalTracker");
+      }
+    } catch (err) {
+      setErrorMessage(err?.response?.data?.message || "Onboarding failed. Please check your details and try again.");
+    } finally {
+      setLoadingScheduleCall(false);
+    }
+  };
+
   const submitOnboarding = async () => {
     const formError = validateForm();
     if (formError) {
       setErrorMessage(formError);
       return;
     }
-
-    setLoadingScheduleCall(true);
-    setErrorMessage("");
-    setSuccessMessage("");
 
     const payload = {
       whatsapp_phone: normalizePhone(form.whatsapp_phone),
@@ -169,29 +213,48 @@ const RentScheduleScreen = ({ navigation }) => {
       landlord_bank_sort_code: form.landlord_payment_mode === "BANK" ? form.landlord_bank_sort_code.trim() : "",
       vendor_tag: "RB",
     };
-    console.log("payload", payload);
 
-    try {
-      const response = await axiosInstance.post("/tenants/onboard", payload);
-      const responseData = response?.data ?? {};
-      if (responseData?.unit_id) {
-        dispatch(setUnitId(responseData.unit_id));
+    const hasLandlordIdentity =
+      payload.landlord_name.trim().length > 0 && payload.landlord_phone.trim().length > 0;
+
+    if (payload.landlord_payment_mode === "MOBILE_MONEY" && hasLandlordIdentity) {
+      const samePhone = payload.landlord_phone === payload.landlord_payment_account;
+      const sameName = normalizeName(payload.landlord_name) === normalizeName(payload.landlord_mobile_registered_name);
+      if (!samePhone || !sameName) {
+        Alert.alert(
+          "Please Confirm Landlord Details",
+          `Landlord Name: ${payload.landlord_name}\nRegistered Mobile Money Name: ${payload.landlord_mobile_registered_name}\n\nLandlord Phone: ${payload.landlord_phone}\nMobile Money Number: ${payload.landlord_payment_account}\n\nThese details are different. Confirm if this is correct.`,
+          [
+            { text: "Go Back", style: "cancel" },
+            {
+              text: "Confirm Submit",
+              onPress: () => processOnboardingSubmission(payload),
+            },
+          ]
+        );
+        return;
       }
-      if (payload.unit_name) {
-        dispatch(setUnitName(payload.unit_name));
-      }
-      setSuccessMessage("Onboarding saved successfully.");
-      const parentNavigator = navigation.getParent();
-      if (parentNavigator) {
-        parentNavigator.navigate("HomeScreen", { screen: "RentalTracker" });
-      } else {
-        navigation.navigate("RentalTracker");
-      }
-    } catch (err) {
-      setErrorMessage(err?.response?.data?.message || "Onboarding failed. Please check your details and try again.");
-    } finally {
-      setLoadingScheduleCall(false);
     }
+
+    if (payload.landlord_payment_mode === "BANK" && payload.landlord_name.trim() && payload.landlord_bank_account_name.trim()) {
+      const sameAccountName = normalizeName(payload.landlord_name) === normalizeName(payload.landlord_bank_account_name);
+      if (!sameAccountName) {
+        Alert.alert(
+          "Please Confirm Bank Account Name",
+          `Landlord Name: ${payload.landlord_name}\nBank Account Name: ${payload.landlord_bank_account_name}\n\nThese names are different. Confirm if this is correct before submitting.`,
+          [
+            { text: "Go Back", style: "cancel" },
+            {
+              text: "Confirm Submit",
+              onPress: () => processOnboardingSubmission(payload),
+            },
+          ]
+        );
+        return;
+      }
+    }
+
+    processOnboardingSubmission(payload);
   };
 
   return (
@@ -255,7 +318,7 @@ const RentScheduleScreen = ({ navigation }) => {
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Next Payment Date</Text>
         <Text style={styles.helperText}>
-          Select a date within the next 60 days. This date starts your occupancy cycle.
+          This is the day we pay your landlord is paid.
         </Text>
         <View style={styles.pickerContainer}>
           <Text style={styles.information}>Select Date:</Text>

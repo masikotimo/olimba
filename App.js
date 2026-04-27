@@ -36,6 +36,7 @@ import PaymentMethodScreen from "./src/screens/Payments/PaymentMethodScreen";
 import MobileMoneyPayment from "./src/screens/Payments/MobileMoneyPayment";
 import PaymentListScreen from "./src/screens/Payments/PaymentListScreen";
 import PaymentDetailsScreen from "./src/screens/Payments/PaymentDetailsScreen";
+import PaymentReceiptScreen from "./src/screens/Payments/PaymentReceiptScreen";
 import UtilityPaymentsScreen from "./src/screens/Payments/UtilityPaymentsScreen";
 import PaymentWaitingScreen from "./src/screens/Payments/PaymentWaitingScreen";
 
@@ -101,6 +102,7 @@ function PaymentScreens() {
     <Stack.Navigator >
         <Stack.Screen name="PaymentsList" component={PaymentListScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="PaymentDetails" component={PaymentDetailsScreen}/>
+        <Stack.Screen name="PaymentReceipt" component={PaymentReceiptScreen} options={{ title: "Payment Receipt" }}/>
     </Stack.Navigator>
   )
 }

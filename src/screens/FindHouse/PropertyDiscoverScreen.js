@@ -1,25 +1,22 @@
-import React, {useEffect, useState} from 'react';
-import axios from 'axios';
-import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert} from 'react-native';
-import { useSelector, useDispatch } from "react-redux";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, Button, Card } from 'react-native-elements';
+import React, {useEffect, useMemo, useState} from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text } from 'react-native-elements';
 import SearchBar from '../../components/SearchBar';
 import PropertyCardTop from '../../components/PropertyCardTop';
 import { AntDesign } from '@expo/vector-icons'; 
 import axiosInstance from '../../api/axiosInstance';
 import CategoryButton from '../../components/CategoryButton';
-import { Linking } from 'react-native';
 
 const categories = ['Near You', 'Apartment', 'Full House', 'Condominium'];
 
+const hasUnitImages = (unit) =>
+  Array.isArray(unit?.images) && unit.images.some((img) => Boolean(img?.image));
+
 const PropertyDiscoverScreen = ({navigation}) => {
-  const insets = useSafeAreaInsets();
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
-  const [loadingResults, setLoadingResults] = useState(false)
+  const [loadingResults, setLoadingResults] = useState(true)
   const [error, setError] = useState(false);
-  const token = useSelector((state) => state.auth.token);
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   const useGetHouses = async () => {    
@@ -33,10 +30,19 @@ const PropertyDiscoverScreen = ({navigation}) => {
     }
   }
 
-  const filteredResults = results.filter(result =>
-    result.related_rental.location &&
-    result.related_rental.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredResults = useMemo(() => {
+    const locationFiltered = results.filter((result) => {
+      const location = result?.related_rental?.location ?? "";
+      return location.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    return [...locationFiltered].sort((a, b) => {
+      const aHasImage = hasUnitImages(a);
+      const bHasImage = hasUnitImages(b);
+      if (aHasImage === bHasImage) return 0;
+      return aHasImage ? -1 : 1;
+    });
+  }, [results, searchTerm]);
 
   useEffect(() => {
     useGetHouses()
