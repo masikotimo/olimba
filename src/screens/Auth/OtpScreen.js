@@ -26,6 +26,7 @@ const OtpScreen = (props) => {
   const dispatch = useDispatch()
   const userSignUp = useSelector((state) => state.auth.userSignUp);
   const [loadingSignIn, setLoadingSignIn] = useState(false);
+  const [resendingOtp, setResendingOtp] = useState(false);
 
   const [attemptsRemaining, setAttemptsRemaining] = useState(attempts);
   const [otpArray, setOtpArray] = useState(['', '', '', '']);
@@ -147,19 +148,56 @@ const OtpScreen = (props) => {
     textInputRef.current = node;
   };
 
-  const onResendOtpButtonPress = () => {
-    // clear last OTP
-    if (firstTextInputRef) {
-      setOtpArray(['', '', '', '']);
-      firstTextInputRef.current.focus();
+  const onResendOtpButtonPress = async () => {
+    if (resendButtonDisabledTime > 0 || resendingOtp || !userSignUp?.username) {
+      return;
     }
 
-    setResendButtonDisabledTime(RESEND_OTP_TIME_LIMIT);
-    startResendOtpTimer();
+    setOtpArray(['', '', '', '']);
+    firstTextInputRef.current?.focus();
+    setResendingOtp(true);
+    setErrorMessage('');
 
-    // resend OTP Api call
-    // todo
-    console.log('todo: Resend OTP');
+    try {
+      const phoneNumber = String(userSignUp.username).replaceAll(' ', '').trim();
+      const response = await axiosInstance.post('/accounts/authenticate/tenant', {
+        phone_number: phoneNumber,
+      });
+
+      if (response.data.status === 200) {
+        toast.show('OTP sent successfully', {
+          type: 'success',
+          placement: 'top',
+          duration: 4000,
+          offset: 1000,
+          animationType: 'slide-in',
+        });
+        setResendButtonDisabledTime(RESEND_OTP_TIME_LIMIT);
+        startResendOtpTimer();
+      } else {
+        toast.show('Failed to resend OTP. Please try again.', {
+          type: 'danger',
+          placement: 'top',
+          duration: 4000,
+          offset: 1000,
+          animationType: 'slide-in',
+        });
+      }
+    } catch (err) {
+      const message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        'Failed to resend OTP. Please try again.';
+      toast.show(typeof message === 'string' ? message : 'Failed to resend OTP. Please try again.', {
+        type: 'danger',
+        placement: 'top',
+        duration: 4000,
+        offset: 1000,
+        animationType: 'slide-in',
+      });
+    } finally {
+      setResendingOtp(false);
+    }
   };
 
   const onSubmitButtonPress = async () => {
@@ -294,12 +332,19 @@ const OtpScreen = (props) => {
                 ))}
             </View>
 
-          <TouchableOpacity>
-            <Text>Resend OTP</Text>
+          <TouchableOpacity
+            style={styles.otpResendButton}
+            onPress={onResendOtpButtonPress}
+            disabled={resendButtonDisabledTime > 0 || resendingOtp}
+          >
+            {resendingOtp ? (
+              <ActivityIndicator color="#FCB200" />
+            ) : resendButtonDisabledTime > 0 ? (
+              <TimerText text={'Resend OTP in'} time={resendButtonDisabledTime} />
+            ) : (
+              <Text style={styles.otpResendButtonText}>Resend OTP</Text>
+            )}
           </TouchableOpacity>
-          {/* {resendButtonDisabledTime > 0 ? (
-            <TimerText text={'Resend OTP in'} time={resendButtonDisabledTime} />
-          ) : ( */}
           <>
           {loadingSignIn ? (
             <Button
@@ -316,7 +361,6 @@ const OtpScreen = (props) => {
             />
             )}
           </>
-          {/* )} */}
           <View style={styles.fill} />
           {submittingOtp && <ActivityIndicator />}
           {autoSubmitOtpTime > 0 &&

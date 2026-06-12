@@ -2,7 +2,7 @@ export default {
   expo: {
     name: "RentBeta",
     slug: "rent-beta",
-    version: "1.0.27",
+    version: "1.0.30",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, TextInput, ActivityIndicator } from 'react-native';
 import { Text, Button } from 'react-native-elements';
 import PhoneInput, { getCountryByCca2 } from 'react-native-international-phone-number';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 import { setPhoneNumber, setUserSignUp } from '../../store/authslice';
 import { useDispatch } from "react-redux";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -10,6 +11,7 @@ import axiosInstance from '../../api/axiosInstance';
 
 const SigninScreen = ({navigation}) => {
   const [errors, setErrors] = useState({}); 
+  const [errorMessage, setErrorMessage] = useState('');
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [loadingSignIn, setLoadingSignIn] = useState(false);
@@ -43,6 +45,18 @@ const SigninScreen = ({navigation}) => {
   const buildInternationalPhone = (country, phone) => {
     const localPhone = normalizeLocalPhone(phone);
     return `${getCountryCodePrefix(country)}${localPhone}`.replaceAll(' ', '');
+  };
+
+  /** Full-number validation so Uganda (9 digits), India (10), etc. each work — not a fixed length. */
+  const isCompleteValidPhone = (country, phone) => {
+    if (!country || !(phone ?? '').trim()) return false;
+    const e164 = buildInternationalPhone(country, phone);
+    try {
+      const parsed = parsePhoneNumberFromString(e164);
+      return Boolean(parsed?.isValid());
+    } catch {
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -84,14 +98,33 @@ const SigninScreen = ({navigation}) => {
 
   const handleInputValue = async (phoneNumber) =>  {
     setInputValue(phoneNumber);
-    const normalizedPhone = normalizeLocalPhone(phoneNumber);
-    if(normalizedPhone.length === 9){
-        await fetchUserDetails(phoneNumber);
-        setDetailsVerified(true)
-    }else{
-        setDetailsVerified(false)
+    if (!isCompleteValidPhone(selectedCountry, phoneNumber)) {
+      setDetailsVerified(false);
+      return;
     }
-  }
+    await fetchUserDetails(phoneNumber);
+    setDetailsVerified(true);
+  };
+
+  useEffect(() => {
+    if (!inputValue?.trim() || !selectedCountry) {
+      return;
+    }
+    if (!isCompleteValidPhone(selectedCountry, inputValue)) {
+      setDetailsVerified(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      await fetchUserDetails(inputValue);
+      if (!cancelled) {
+        setDetailsVerified(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCountry]);
 
   const validateForm = () => { 
     let errors = {};
@@ -137,11 +170,13 @@ const SigninScreen = ({navigation}) => {
 
   const signin = async ({ selectedCountry, inputValue }) => {
     try {
+        setErrorMessage('');
         setLoadingSignIn(true);
         const unSpacedNumber = buildInternationalPhone(selectedCountry, inputValue);
         const response = await axiosInstance.post(`/accounts/authenticate/tenant`, { 
             "phone_number": unSpacedNumber 
         });
+
 
         if(response.data.status === 200){
             dispatch(setUserSignUp(response.data.data.user_details));
@@ -192,6 +227,10 @@ const SigninScreen = ({navigation}) => {
           }
         </View>
       </View>
+
+      {errorMessage ? (
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
+      ) : null}
 
       {!userExists && detailsVerified && (
         <View style={styles.inputs}>

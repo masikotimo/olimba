@@ -6,6 +6,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { setUnitId, setUnitName } from "../../store/authslice";
 import DatePickerComponent from "../../components/DatePicker";
 
+const INPUT_PLACEHOLDER_COLOR = "#6B6B6B";
+
 const RentScheduleScreen = ({ navigation }) => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -268,18 +270,21 @@ const RentScheduleScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>Tenant Details</Text>
         <TextInput
           placeholder="WhatsApp Phone (+256...)"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("whatsapp_phone", value)}
           value={form.whatsapp_phone}
         />
         <TextInput
           placeholder="First Name"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("tenant_first_name", value)}
           value={form.tenant_first_name}
         />
         <TextInput
           placeholder="Last Name"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("tenant_last_name", value)}
           value={form.tenant_last_name}
@@ -290,6 +295,7 @@ const RentScheduleScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>Property and Rent</Text>
         <TextInput
           placeholder="Monthly Rent (e.g. 150000.00)"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           keyboardType="numeric"
           onChangeText={(value) => onInputChange("monthly_rent", value)}
@@ -297,18 +303,21 @@ const RentScheduleScreen = ({ navigation }) => {
         />
         <TextInput
           placeholder="Property Name"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("property_name", value)}
           value={form.property_name}
         />
         <TextInput
           placeholder="Property Location"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("property_location", value)}
           value={form.property_location}
         />
         <TextInput
           placeholder="Unit Name"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("unit_name", value)}
           value={form.unit_name}
@@ -435,7 +444,8 @@ const RentScheduleScreen = ({ navigation }) => {
             {form.balance_mode === "OUTSTANDING" ? (
               <TextInput
                 placeholder="Outstanding Balance Amount"
-                style={styles.inputBox}
+                placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
                 keyboardType="numeric"
                 onChangeText={(value) => onInputChange("rent_backlog_amount", value)}
                 value={form.rent_backlog_amount}
@@ -443,7 +453,8 @@ const RentScheduleScreen = ({ navigation }) => {
             ) : (
               <TextInput
                 placeholder="Balance Carried Forward Amount"
-                style={styles.inputBox}
+                placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
                 keyboardType="numeric"
                 onChangeText={(value) => onInputChange("balance_carried_forward", value)}
                 value={form.balance_carried_forward}
@@ -452,7 +463,8 @@ const RentScheduleScreen = ({ navigation }) => {
 
             <TextInput
               placeholder="Description of Balance (optional)"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("rent_backlog_description", value)}
               value={form.rent_backlog_description}
             />
@@ -464,12 +476,14 @@ const RentScheduleScreen = ({ navigation }) => {
         <Text style={styles.sectionTitle}>Landlord Payment Details</Text>
         <TextInput
           placeholder="Landlord Name"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("landlord_name", value)}
           value={form.landlord_name}
         />
         <TextInput
           placeholder="Landlord Phone"
+          placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
           style={styles.inputBox}
           onChangeText={(value) => onInputChange("landlord_phone", value)}
           value={form.landlord_phone}
@@ -508,13 +522,15 @@ const RentScheduleScreen = ({ navigation }) => {
           <>
             <TextInput
               placeholder="Mobile Money Number"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_payment_account", value)}
               value={form.landlord_payment_account}
             />
             <TextInput
               placeholder="Registered Mobile Money Name"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_mobile_registered_name", value)}
               value={form.landlord_mobile_registered_name}
             />
@@ -523,31 +539,36 @@ const RentScheduleScreen = ({ navigation }) => {
           <>
             <TextInput
               placeholder="Bank Name"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_bank_name", value)}
               value={form.landlord_bank_name}
             />
             <TextInput
               placeholder="Bank Account Number"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_bank_account_number", value)}
               value={form.landlord_bank_account_number}
             />
             <TextInput
               placeholder="Bank Account Name"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_bank_account_name", value)}
               value={form.landlord_bank_account_name}
             />
             <TextInput
               placeholder="Bank Branch"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_bank_branch", value)}
               value={form.landlord_bank_branch}
             />
             <TextInput
               placeholder="Bank Sort Code (optional)"
-              style={styles.inputBox}
+              placeholderTextColor={INPUT_PLACEHOLDER_COLOR}
+          style={styles.inputBox}
               onChangeText={(value) => onInputChange("landlord_bank_sort_code", value)}
               value={form.landlord_bank_sort_code}
             />
