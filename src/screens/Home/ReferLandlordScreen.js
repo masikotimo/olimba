@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { Text, Button, Card, Input } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useSelector } from "react-redux";
 import axiosInstance from '../../api/axiosInstance';
+import KeyboardAwareFormScroll from '../../components/KeyboardAwareFormScroll';
 
 const ReferLandlordScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -91,14 +92,13 @@ const ReferLandlordScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView 
+    <KeyboardAwareFormScroll
       style={{
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
-        backgroundColor: "#F0ECE6"
+        backgroundColor: "#F0ECE6",
       }}
+      contentContainerStyle={styles.scrollContent}
     >
       <StatusBar style="dark" />
       <View style={styles.container}>
@@ -208,11 +208,14 @@ const ReferLandlordScreen = ({ navigation }) => {
           * Required fields. By submitting this referral, you confirm that the information provided is accurate.
         </Text>
       </View>
-    </ScrollView>
+    </KeyboardAwareFormScroll>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
   container: {
     padding: 15,
   },

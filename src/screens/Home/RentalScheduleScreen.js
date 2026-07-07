@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
-import { Text, StyleSheet, ScrollView, TextInput, View, TouchableOpacity, Alert } from "react-native";
+import { Text, StyleSheet, TextInput, View, TouchableOpacity, Alert } from "react-native";
 import { Button } from "react-native-elements";
 import { useSelector, useDispatch } from "react-redux";
 import { setUnitId, setUnitName } from "../../store/authslice";
 import DatePickerComponent from "../../components/DatePicker";
+import KeyboardAwareFormScroll from "../../components/KeyboardAwareFormScroll";
 
 const INPUT_PLACEHOLDER_COLOR = "#6B6B6B";
 
@@ -260,7 +261,7 @@ const RentScheduleScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.formContainer} contentContainerStyle={styles.contentContainer}>
+    <KeyboardAwareFormScroll style={styles.formContainer} contentContainerStyle={styles.contentContainer}>
       <Text style={styles.pageTitle}>Tenant Self Onboarding</Text>
       <Text style={styles.disclaimer}>
         Fill in the details below to create your tenancy profile and activate your rent cycle.
@@ -584,7 +585,7 @@ const RentScheduleScreen = ({ navigation }) => {
       ) : (
         <Button buttonStyle={styles.buttonStyle} title="Submit Onboarding" onPress={submitOnboarding} />
       )}
-    </ScrollView>
+    </KeyboardAwareFormScroll>
   );
 };
 
