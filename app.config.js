@@ -2,7 +2,7 @@ export default {
   expo: {
     name: "RentBeta",
     slug: "rent-beta",
-    version: "1.0.31",
+    version: "1.0.32",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -29,7 +29,7 @@ export default {
       },
       softwareKeyboardLayoutMode: "resize",
       package: "com.rentbeta.africa",
-      versionCode: 32,
+      versionCode: 33,
       compileSdkVersion: 35,
       targetSdkVersion: 35,
       buildToolsVersion: "35.0.0",

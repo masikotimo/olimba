@@ -80,7 +80,7 @@ const HomeScreens = () => {
         <Stack.Screen name="LoanRequest" component={LoanRequestScreen} />
         <Stack.Screen name="InsuranceRequest" component={InsuranceRequestScreen} />
         <Stack.Screen name="ScheduleList" component={RentalScheduleListScreen} />
-        <Stack.Screen name="UtilityPayments" component={UtilityPaymentsScreen} options={{ title: 'Utilities' }}/>
+        <Stack.Screen name="UtilityPayments" component={UtilityPaymentsScreen} options={{ title: 'Pay Utilities' }}/>
         <Stack.Screen name="UtilityList" component={UtilitiesListScreen} options={{ title: 'Utilities' }}/>
     </Stack.Navigator>
   )

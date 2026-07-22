@@ -6,6 +6,7 @@ const initialState = {
   userSignUp: null,
   unit_id: null,
   unit_name: null,
+  occupancy_id: null,
   schedule: null,
   isLoggedIn: false,
   isReset: false,
@@ -37,12 +38,17 @@ export const authSlice = createSlice({
         state.token = null;
         state.isLoggedIn = false;
         state.unit_id = null;
+        state.unit_name = null;
+        state.occupancy_id = null;
     },
     setUnitId: (state, action) => {
       state.unit_id = action.payload;
     },
     setUnitName: (state, action) => {
       state.unit_name = action.payload
+    },
+    setOccupancyId: (state, action) => {
+      state.occupancy_id = action.payload;
     },
     setSchedule: (state, action) => {
       state.schedule = action.payload
@@ -77,6 +83,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setLogin, setLogout, setUnitId, setUnitName, setSchedule, setTicketId, setPaymentId, setUserSignUp, setScheduleDate, setPhoneNumber, setIsReset, setPaymentDetails, setPaymentScheduleDetails} = authSlice.actions;
+export const { setLogin, setLogout, setUnitId, setUnitName, setOccupancyId, setSchedule, setTicketId, setPaymentId, setUserSignUp, setScheduleDate, setPhoneNumber, setIsReset, setPaymentDetails, setPaymentScheduleDetails} = authSlice.actions;
 
 export default authSlice.reducer;

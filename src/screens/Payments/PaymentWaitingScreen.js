@@ -1,87 +1,113 @@
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, View, ScrollView, ActivityIndicator, Button } from 'react-native';
-import axiosInstance from '../../api/axiosInstance';
-import { useInterval } from '../../utilities/useInterval';
-import { Text } from 'react-native-elements';
+import React, { useState } from "react";
+import { StyleSheet, View, ScrollView, ActivityIndicator, Button } from "react-native";
+import axiosInstance from "../../api/axiosInstance";
+import { useInterval } from "../../utilities/useInterval";
+import { Text } from "react-native-elements";
 import { useSelector } from "react-redux";
+import { useRoute } from "@react-navigation/native";
+import { getPaymentFlowConfig, PAYMENT_TYPES } from "../../constants/paymentFlows";
 
-const PaymentWaitingScreen = ({navigation}) => {
-    const [status, setStatus] = useState("")
-    const [loadingStatus, setLoadingStatus] = useState("");
-    const [statusError, setStatusError] = useState(false)
-    const token = useSelector((state) => state.auth.token);
-    const payId = useSelector((state) => state.auth.paymentId);
+const PaymentWaitingScreen = ({ navigation }) => {
+  const route = useRoute();
+  const paymentType = route?.params?.paymentType ?? PAYMENT_TYPES.RENT;
+  const utilityType = route?.params?.utilityType;
+  const occupancyId = route?.params?.occupancyId;
+  const flow = getPaymentFlowConfig(paymentType);
 
-    const fetchPaymentStatus = async () => {
-        try {
-            const response = await axiosInstance.post('/tenants/payments/status', {"id": payId});
-            if(response.data.status === 500){
-                setStatusError(true)
-                setStatus("Insufficient Funds, Please try again");
-            };
-            if(response.data.status === 201){
-                navigation.navigate("RentalTracker");
-            };
-        } catch (e) {
-            console.log(e)
-            console.log("Payment Failed");
-            // navigation.navigate("MobileMoneyPayment")
+  const [status, setStatus] = useState("");
+  const [statusError, setStatusError] = useState(false);
+  const payId = useSelector((state) => state.auth.paymentId);
+
+  const fetchPaymentStatus = async () => {
+    if (!payId) return;
+
+    try {
+      const response = await axiosInstance.post(flow.statusEndpoint, { id: payId });
+
+      if (paymentType === PAYMENT_TYPES.UTILITY) {
+        const statusText = response.data?.data;
+
+        if (statusText === "Successful") {
+          navigation.navigate(flow.successRoute);
+          return;
         }
-    };
-  
-    useInterval(async () => {
-        const status = await fetchPaymentStatus()
-    }, 5000)
 
-    const navigateToPayment = () => {
-        setStatusError(false)
-        setStatus("")
-        navigation.navigate("MobileMoneyPayment")
+        if (statusText === "Insufficient Funds") {
+          setStatusError(true);
+          setStatus("Insufficient Funds. Please try again.");
+        }
+
+        return;
+      }
+
+      if (response.data.status === 500) {
+        setStatusError(true);
+        setStatus("Insufficient Funds. Please try again.");
+      }
+
+      if (response.data.status === 201) {
+        navigation.navigate(flow.successRoute);
+      }
+    } catch (e) {
+      console.log("Payment status check failed", e);
     }
+  };
+
+  useInterval(fetchPaymentStatus, 5000);
+
+  const navigateToPayment = () => {
+    setStatusError(false);
+    setStatus("");
+    navigation.navigate(flow.retryRoute, {
+      paymentType,
+      utilityType,
+      occupancyId,
+    });
+  };
 
   return (
     <ScrollView style={styles.formContainer}>
-      
-      <ActivityIndicator size="large" color="#FCB200" style={{marginTop: 25, marginBottom: 25}}/>
-      
-      <View style={{alignItems: "center"}}>
-        <Text style={styles.disclaimer}>We are waiting for your Confirmation</Text>
+      <ActivityIndicator size="large" color="#FCB200" style={styles.loader} />
 
-        <Text style={styles.disclaimer}>Please follow the instructions below and do not leave the screen. This may take upto 2 minutes</Text>
+      <View style={styles.centered}>
+        <Text style={styles.disclaimer}>We are waiting for your Confirmation</Text>
+        <Text style={styles.disclaimer}>
+          Please follow the instructions below and do not leave the screen. This may take up to 2 minutes
+        </Text>
       </View>
-      
+
       <View style={styles.textContainer}>
-        <Text style={styles.disclaimer}>If you do not receive a USSD prompt, follow these instructions to complete your payment</Text>
-        <Text style={styles.disclaimer}>1. Dial *165*8*3*1# for MTN or *185*8*2# for Airtel to see the pending payment on the USSD Menu</Text>
+        <Text style={styles.disclaimer}>
+          If you do not receive a USSD prompt, follow these instructions to complete your payment
+        </Text>
+        <Text style={styles.disclaimer}>
+          1. Dial *165*8*3*1# for MTN or *185*10*6*2# for Airtel to see the pending payment on the USSD Menu
+        </Text>
         <Text style={styles.disclaimer}>2. Enter your pin to confirm</Text>
-        <Text style={styles.disclaimer}>3. If your payment is successful, you will be redirected to the Rental Tracker</Text>
+        <Text style={styles.disclaimer}>3. If your payment is successful, {flow.successMessage}</Text>
       </View>
 
       {statusError ? (
-        <View style={{alignItems: "center"}}>
-             <Text style={styles.disclaimer}>{status}</Text>
-            <Button
-                buttonStyle={styles.buttonStyle}
-                title="Try Again"
-                onPress={() => navigateToPayment()}
-            />
+        <View style={styles.centered}>
+          <Text style={styles.disclaimer}>{status}</Text>
+          <Button buttonStyle={styles.buttonStyle} title="Try Again" onPress={navigateToPayment} />
         </View>
-       
-      ) : (<></>)}
+      ) : null}
     </ScrollView>
-  )
+  );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-    marginLeft: 15,
-    marginRight: 15
-  },
   formContainer: {
     flex: 1,
     width: "100%",
-    display: "flex",
+  },
+  loader: {
+    marginTop: 25,
+    marginBottom: 25,
+  },
+  centered: {
+    alignItems: "center",
   },
   textContainer: {
     backgroundColor: "white",
@@ -91,22 +117,22 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     marginLeft: 15,
     marginRight: 15,
-    marginTop: 15
+    marginTop: 15,
   },
   disclaimer: {
     marginTop: 20,
     paddingLeft: 15,
     paddingRight: 15,
     fontSize: 15,
-    fontWeight: 300
+    fontWeight: "300",
   },
   buttonStyle: {
-    backgroundColor: '#FCB200',
+    backgroundColor: "#FCB200",
     padding: 15,
     borderRadius: 10,
     marginLeft: 15,
     marginRight: 15,
-    marginTop: 60
+    marginTop: 60,
   },
 });
 

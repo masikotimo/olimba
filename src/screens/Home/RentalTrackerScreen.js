@@ -6,7 +6,7 @@ import moment from "moment";
 import { AntDesign } from '@expo/vector-icons';
 import { Ionicons,MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from "react-redux";
-import { setUnitId, setUnitName } from '../../store/authslice';
+import { setUnitId, setUnitName, setOccupancyId } from '../../store/authslice';
 import NetworkStatus from '../../components/NetworkStatus';
 import { StatusBar } from 'expo-status-bar';
 import { currencyFormatter } from '../../utilities/currencyFormatter';
@@ -24,8 +24,11 @@ const RentalTrackerScreen = ({navigation}) => {
   const [isLoadingRentals, setLoadingRentals] = useState(true);
   const [isUnitMenuOpen, setIsUnitMenuOpen] = useState(false);
 	const [error, setError] = useState(false);
+  const [utilitiesEnrolled, setUtilitiesEnrolled] = useState(false);
+  const [utilitiesInfo, setUtilitiesInfo] = useState(null);
   const unit_id = useSelector((state) => state.auth.unit_id);
   const unit_name = useSelector((state) => state.auth.unit_name);
+  const occupancy_id = useSelector((state) => state.auth.occupancy_id);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const unitOptions = rentals
@@ -35,6 +38,7 @@ const RentalTrackerScreen = ({navigation}) => {
       return {
         id: unit.id,
         unit_name: unit.unit_name,
+        occupancy_id: item?.id ?? null,
       };
     })
     .filter(Boolean);
@@ -47,6 +51,13 @@ const RentalTrackerScreen = ({navigation}) => {
     unit_name ||
     unitOptions[0]?.unit_name ||
     "Select Unit";
+
+  const selectUnit = (unit) => {
+    if (!unit?.id) return;
+    dispatch(setUnitId(unit.id));
+    dispatch(setUnitName(unit.unit_name));
+    dispatch(setOccupancyId(unit.occupancy_id ?? null));
+  };
 
 
   const useGetOccupancyDetails = async () => {    
@@ -93,6 +104,27 @@ const RentalTrackerScreen = ({navigation}) => {
     }
   }
 
+  const fetchUtilitiesEnrollment = useCallback(async (occupancyId) => {
+    if (!occupancyId) {
+      setUtilitiesEnrolled(false);
+      setUtilitiesInfo(null);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("/tenants/utilities", {
+        params: { occupancy_id: occupancyId },
+      });
+      const data = response.data;
+      const isEnrolled = Boolean(data?.enrolled);
+      setUtilitiesEnrolled(isEnrolled);
+      setUtilitiesInfo(isEnrolled ? data : null);
+    } catch (e) {
+      setUtilitiesEnrolled(false);
+      setUtilitiesInfo(null);
+    }
+  }, []);
+
   useEffect(() => {
     useGetOccupancyDetails()
     useGetOccupancyList()
@@ -100,26 +132,35 @@ const RentalTrackerScreen = ({navigation}) => {
     const unsubscribe = navigation.addListener('focus', () => {
       useGetOccupancyDetails();
       useGetOccupancyList();
+      const activeOccupancyId = occupancy_id ?? selectedUnit?.occupancy_id ?? null;
+      fetchUtilitiesEnrollment(activeOccupancyId);
     })
 
     return unsubscribe
-  }, [navigation, unit_id, refreshing, hasUnitOptions])
+  }, [navigation, unit_id, refreshing, hasUnitOptions, occupancy_id, selectedUnit?.occupancy_id, fetchUtilitiesEnrollment])
 
   useEffect(() => {
     if (unitOptions.length > 0 && !hasSelectedUnitInOptions) {
-      const firstUnit = unitOptions[0];
-      if (firstUnit?.id) {
-        dispatch(setUnitId(firstUnit.id));
-        dispatch(setUnitName(firstUnit.unit_name));
-      }
+      selectUnit(unitOptions[0]);
       return;
     }
 
-    if (unitOptions.length === 0 && unit_id) {
+    if (selectedUnit?.occupancy_id && String(occupancy_id) !== String(selectedUnit.occupancy_id)) {
+      dispatch(setOccupancyId(selectedUnit.occupancy_id));
+      return;
+    }
+
+    if (unitOptions.length === 0 && (unit_id || occupancy_id)) {
       dispatch(setUnitId(null));
       dispatch(setUnitName(""));
+      dispatch(setOccupancyId(null));
     }
-  }, [unitOptions, hasSelectedUnitInOptions, unit_id, dispatch]);
+  }, [unitOptions, hasSelectedUnitInOptions, selectedUnit, unit_id, occupancy_id, dispatch]);
+
+  useEffect(() => {
+    const activeOccupancyId = occupancy_id ?? selectedUnit?.occupancy_id ?? null;
+    fetchUtilitiesEnrollment(activeOccupancyId);
+  }, [occupancy_id, selectedUnit?.occupancy_id, fetchUtilitiesEnrollment, refreshing]);
 
   useEffect(() => {
     if (!hasUnitOptions) {
@@ -133,6 +174,20 @@ const RentalTrackerScreen = ({navigation}) => {
       setRefreshing(false);
     }, 2000);
   }, []);
+
+  const handlePayUtilities = () => {
+    const occupancyId = occupancy_id ?? selectedUnit?.occupancy_id ?? null;
+
+    if (!utilitiesEnrolled || !occupancyId || !utilitiesInfo) {
+      return;
+    }
+
+    navigation.navigate("UtilityPayments", {
+      occupancyId: utilitiesInfo.occupancy_id ?? occupancyId,
+      rentalUnitId: utilitiesInfo.rental_unit_id,
+      utilities: utilitiesInfo.utilities,
+    });
+  };
 
   let datesWhitelist = [{
     start: moment(),
@@ -184,8 +239,7 @@ const RentalTrackerScreen = ({navigation}) => {
                           isSelected && styles.unitSelectorMenuItemSelected,
                         ]}
                         onPress={() => {
-                          dispatch(setUnitId(item.id));
-                          dispatch(setUnitName(item.unit_name));
+                          selectUnit(item);
                           setIsUnitMenuOpen(false);
                         }}
                       >
@@ -322,6 +376,13 @@ const RentalTrackerScreen = ({navigation}) => {
             </TouchableOpacity>
           </Card>
         </View>
+        {hasActiveTenancy && utilitiesEnrolled ? (
+          <Button
+            buttonStyle={styles.utilitiesButtonStyle}
+            title="Pay Utilities"
+            onPress={handlePayUtilities}
+          />
+        ) : null}
       </View>
     </ScrollView>
   )
@@ -380,6 +441,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginLeft: 15,
     marginRight: 15
+  },
+  utilitiesButtonStyle: {
+    backgroundColor: '#424447',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 12,
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 20,
   },
   installmentText: {
     marginLeft: 15,
